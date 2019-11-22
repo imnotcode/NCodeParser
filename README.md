@@ -14,7 +14,7 @@
 - Requirements:
   - Windows 7 or higher
   - .Net Framework 4.7.2 or higher
-- Download
+- [Download](https://github.com/imnotcode/NCodeParser/releases)
 
 ## How to use
 
