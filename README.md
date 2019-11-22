@@ -1,10 +1,20 @@
 # NCodeParser
 
+
+
 ## Prerequisites
+
+* Visual Studio 2019
+* .Net Framework 4.7.2
 
 ## Features
 
-## Getting started
+## Installation
+
+- Requirements:
+  - Windows 7 or higher
+  - .Net Framework 4.7.2 or higher
+- Download
 
 ## How to use
 
