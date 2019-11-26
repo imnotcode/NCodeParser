@@ -151,6 +151,9 @@ namespace NCodeParser.Model
 		{
 			Episodes = new ObservableCollection<Episode>();
 
+			EpisodeStartIndex = -1;
+			EpisodeEndIndex = -1;
+
 			ProgressMax = 1;
 			ProgressValue = 0;
 		}
