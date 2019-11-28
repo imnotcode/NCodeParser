@@ -35,9 +35,23 @@ namespace NCodeParser.Model
 			}
 		}
 
+		public string Text
+		{
+			get
+			{
+				return _Text;
+			}
+			set
+			{
+				_Text = value;
+				RaisePropertyChanged();
+			}
+		}
+
         private int _Number;
         private string _Title;
 		private string _URLNumber;
+		private string _Text;
 
         public override string ToString()
         {

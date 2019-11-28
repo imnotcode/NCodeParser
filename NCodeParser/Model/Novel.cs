@@ -32,6 +32,19 @@ namespace NCodeParser.Model
 			}
 		}
 
+		public string Name
+		{
+			get
+			{
+				return _Name;
+			}
+			set
+			{
+				_Name = value;
+				RaisePropertyChanged();
+			}
+		}
+
 		public string Desc
 		{
 			get
@@ -42,6 +55,22 @@ namespace NCodeParser.Model
 			{
 				_Desc = value;
 				RaisePropertyChanged();
+				RaisePropertyChanged(nameof(DescWithPrologue));
+			}
+		}
+
+		public string DescWithPrologue
+		{
+			get
+			{
+				if (Episodes.Count > 0)
+				{
+					return Desc + Episodes[0].Text;
+				}
+				else
+				{
+					return Desc;
+				}
 			}
 		}
 
@@ -139,6 +168,7 @@ namespace NCodeParser.Model
 
 		private NovelType _Type;
 		private string _Code;
+		private string _Name;
 		private string _Desc;
 		private int _UpdateCount;
 		private int _EpisodeStartIndex;

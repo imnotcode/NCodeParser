@@ -62,7 +62,7 @@ namespace NCodeParser.IO
 				{
 					Code = Code,
 					Type = NovelType,
-					Desc = Desc
+					Name = Desc
 				});
 			}
 
@@ -87,7 +87,7 @@ namespace NCodeParser.IO
 
 					NovelData[string.Format("Novel{0:D4}", i + 1)]["Code"] = Novels[i].Code;
 					NovelData[string.Format("Novel{0:D4}", i + 1)]["Type"] = Novels[i].Type.ToString();
-					NovelData[string.Format("Novel{0:D4}", i + 1)]["Desc"] = Novels[i].Desc;
+					NovelData[string.Format("Novel{0:D4}", i + 1)]["Desc"] = Novels[i].Name;
 				}
 
 				Parser.WriteFile(NovelDataPath, NovelData, Encoding.UTF8);

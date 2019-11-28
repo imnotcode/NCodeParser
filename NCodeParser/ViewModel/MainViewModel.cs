@@ -171,33 +171,43 @@ namespace NCodeParser.ViewModel
 			CheckAllUpdate();
 		}
 
-		private async void SelectNovel(Novel Novel)
+		private async void SelectNovel(Novel novel)
 		{
-			if (Novel == null)
+			if (novel == null)
 			{
 				return;
 			}
 
-			if (Novel.Episodes.Count == 0)
+			if (novel.Episodes.Count == 0)
 			{
 				var Episodes = await Task.Run(() =>
 				{
-					return Downloader.DownloadList(Novel);
+					return Downloader.DownloadList(novel);
 				});
 
 				if (Episodes != null)
 				{
-					Novel.Episodes.Clear();
-					Novel.Episodes.AddAll(Episodes);
+					novel.Episodes.Clear();
+					novel.Episodes.AddAll(Episodes);
 
 					CommandManager.InvalidateRequerySuggested();
 				}
 			}
 
-			if (Novel.EpisodeStartIndex == -1 && Novel.EpisodeEndIndex == -1)
+			if (novel.EpisodeStartIndex == -1 && novel.EpisodeEndIndex == -1)
 			{
-				Novel.EpisodeStartIndex = 0;
-				Novel.EpisodeEndIndex = Novel.Episodes.Count - 1;
+				novel.EpisodeStartIndex = 0;
+				novel.EpisodeEndIndex = novel.Episodes.Count - 1;
+			}
+
+			if (novel.Episodes.Count > 0 && string.IsNullOrWhiteSpace(novel.Episodes[0].Text))
+			{
+				await Task.Run(() =>
+				{
+					Downloader.DownloadNovel(novel, 0, 0, false, true);
+				});
+
+				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
 			}
 		}
 
@@ -209,50 +219,50 @@ namespace NCodeParser.ViewModel
 			}
 		}
 
-		private async void CheckUpdate(Novel Novel)
+		private async void CheckUpdate(Novel novel)
 		{
-			if (Novel == null)
+			if (novel == null)
 			{
 				return;
 			}
 
-			if (Novel.Episodes.Count == 0)
+			if (novel.Episodes.Count == 0)
 			{
 				var Episodes = await Task.Run(() =>
 				{
-					return Downloader.DownloadList(Novel);
+					return Downloader.DownloadList(novel);
 				});
 
 				if (Episodes != null)
 				{
-					Novel.Episodes.Clear();
-					Novel.Episodes.AddAll(Episodes);
+					novel.Episodes.Clear();
+					novel.Episodes.AddAll(Episodes);
 
 					CommandManager.InvalidateRequerySuggested();
 				}
 			}
 
-			Novel.EpisodeStartIndex = 0;
-			Novel.EpisodeEndIndex = Novel.Episodes.Count - 1;
+			novel.EpisodeStartIndex = 0;
+			novel.EpisodeEndIndex = novel.Episodes.Count - 1;
 
-			string FilePath = AppDomain.CurrentDomain.BaseDirectory + Novel.Desc;
+			string filePath = AppDomain.CurrentDomain.BaseDirectory + novel.Name;
 
-			if (Novel.Episodes.Count == 0)
+			if (novel.Episodes.Count == 0)
 			{
-				Novel.UpdateCount = 0;
+				novel.UpdateCount = 0;
 				return;
 			}
 
-			if (!Directory.Exists(FilePath))
+			if (!Directory.Exists(filePath))
 			{
-				Novel.UpdateCount = Novel.Episodes.Count;
+				novel.UpdateCount = novel.Episodes.Count;
 				return;
 			}
 
-			var MyDirectory = new DirectoryInfo(FilePath);
+			var MyDirectory = new DirectoryInfo(filePath);
 			var Files = MyDirectory.GetFiles("*.txt");
 
-			int LastNumber = Novel.Episodes[Novel.Episodes.Count - 1].Number;
+			int LastNumber = novel.Episodes[novel.Episodes.Count - 1].Number;
 			int Max = 0;
 
 			for (int i = 0; i < Files.Length; i++)
@@ -297,11 +307,11 @@ namespace NCodeParser.ViewModel
 				}
 			}
 
-			Novel.UpdateCount = LastNumber - Max;
+			novel.UpdateCount = LastNumber - Max;
 
-			if (Novel.UpdateCount > 0)
+			if (novel.UpdateCount > 0)
 			{
-				Novel.EpisodeStartIndex = Novel.EpisodeEndIndex - (Novel.UpdateCount - 1);
+				novel.EpisodeStartIndex = novel.EpisodeEndIndex - (novel.UpdateCount - 1);
 			}
 		}
 
