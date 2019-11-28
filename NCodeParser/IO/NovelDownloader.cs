@@ -19,18 +19,10 @@ namespace NCodeParser.IO
 		private readonly string NCode18URL = "https://novel18.syosetu.com/";
 		private readonly string KakuyomuURL = "https://kakuyomu.jp/works/";
 
-		public bool Downloading
-		{
-			get;
-			private set;
-		}
-
 		public event EventHandler<int> ProgressChanged;
 
 		public async Task<List<Episode>> DownloadList(Novel novel)
 		{
-			Downloading = true;
-
 			try
 			{
 				if (novel.Type == NovelType.Normal || novel.Type == NovelType.R18)
@@ -199,7 +191,7 @@ namespace NCodeParser.IO
 			}
 			finally
 			{
-				Downloading = false;
+
 			}
 
 			return null;
@@ -207,7 +199,7 @@ namespace NCodeParser.IO
 
 		public async Task DownloadNovel(Novel novel, int startIndex, int endIndex, bool merging, bool loadOnly = false)
 		{
-			Downloading = true;
+			novel.Downloading = true;
 
 			try
 			{
@@ -228,7 +220,6 @@ namespace NCodeParser.IO
 
 					for (int i = startIndex; i <= endIndex; i++)
 					{
-						Console.WriteLine(i);
 						var builder = new StringBuilder();
 
 						var client = new CookieAwareWebClient();
@@ -335,7 +326,6 @@ namespace NCodeParser.IO
 
 					for (int i = startIndex; i <= endIndex; i++)
 					{
-						Console.WriteLine(i);
 						var builder = new StringBuilder();
 
 						var client = new HttpClient();
@@ -406,7 +396,7 @@ namespace NCodeParser.IO
 			}
 			finally
 			{
-				Downloading = false;
+				novel.Downloading = false;
 			}
 		}
 	}

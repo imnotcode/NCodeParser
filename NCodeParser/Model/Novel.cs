@@ -173,6 +173,28 @@ namespace NCodeParser.Model
 			}
 		}
 
+		public bool Downloading
+		{
+			get
+			{
+				return _Downloading;
+			}
+			set
+			{
+				_Downloading = value;
+				RaisePropertyChanged();
+				RaisePropertyChanged(nameof(Downloadable));
+			}
+		}
+
+		public bool Downloadable
+		{
+			get
+			{
+				return !Downloading;
+			}
+		}
+
 		public ObservableCollection<Episode> Episodes
 		{
 			get; private set;
@@ -189,6 +211,7 @@ namespace NCodeParser.Model
 		private int _ProgressMax;
 		private bool _Merging;
 		private bool _ShowProgress;
+		private bool _Downloading;
 
 		public Novel()
 		{

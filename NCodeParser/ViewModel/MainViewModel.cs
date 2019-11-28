@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -68,6 +70,7 @@ namespace NCodeParser.ViewModel
 			{
 				_SelectedNovel = value;
 				RaisePropertyChanged();
+				RaisePropertyChanged(nameof(DownloadCommand));
 
 				if (SelectedNovel != null)
 				{
@@ -115,20 +118,6 @@ namespace NCodeParser.ViewModel
 			}
 		}
 
-		public bool Downloading
-		{
-			get
-			{
-				return _Downloading;
-			}
-			set
-			{
-				_Downloading = value;
-				RaisePropertyChanged();
-				RaisePropertyChanged(nameof(Downloadable));
-			}
-		}
-
 		public bool ShowProgress
 		{
 			get
@@ -144,19 +133,10 @@ namespace NCodeParser.ViewModel
 			}
 		}
 
-		public bool Downloadable
-		{
-			get
-			{
-				return !Downloading;
-			}
-		}
-
 		private Novel _SelectedNovel;
 		private string _Code1;
 		private string _Code2;
 		private string _Code3;
-		private bool _Downloading;
 
 		private NovelDownloader Downloader;
 		private INIManager INIManager;
@@ -172,8 +152,8 @@ namespace NCodeParser.ViewModel
 			AddCommand1 = new RelayCommand(OnAdd1, CanAdd1);
 			AddCommand2 = new RelayCommand(OnAdd2, CanAdd2);
 			AddCommand3 = new RelayCommand(OnAdd3, CanAdd3);
-			SelectAllCommand = new RelayCommand(OnSelectAll, CanSelectAll);
-			DownloadCommand = new RelayCommand(OnDownload, CanDownload);
+			SelectAllCommand = new RelayCommand(OnSelectAll);
+			DownloadCommand = new RelayCommand(OnDownload);
 			ClosingCommand = new RelayCommand(OnClosing);
 			SettingCommand = new RelayCommand(OnSetting);
 
@@ -193,7 +173,10 @@ namespace NCodeParser.ViewModel
 				SelectedNovel = NovelList[0];
 			}
 
-			await CheckAllUpdate();
+			if (!IsInDesignMode)
+			{
+				await CheckAllUpdate();
+			}
 		}
 
 		private async Task SelectNovel(Novel novel)
@@ -205,10 +188,7 @@ namespace NCodeParser.ViewModel
 
 			if (novel.Episodes.Count == 0)
 			{
-				var Episodes = await Task.Run(() =>
-				{
-					return Downloader.DownloadList(novel);
-				});
+				var Episodes = await Downloader.DownloadList(novel);
 
 				if (Episodes != null)
 				{
@@ -258,29 +238,13 @@ namespace NCodeParser.ViewModel
 				return;
 			}
 
+			Task<List<Episode>> downloadTask = null;
 			if (novel.Episodes.Count == 0)
 			{
-				var Episodes = await Downloader.DownloadList(novel);
-
-				if (Episodes != null)
-				{
-					novel.Episodes.Clear();
-					novel.Episodes.AddAll(Episodes);
-
-					CommandManager.InvalidateRequerySuggested();
-				}
+				downloadTask = Downloader.DownloadList(novel);
 			}
-
-			novel.EpisodeStartIndex = 0;
-			novel.EpisodeEndIndex = novel.Episodes.Count - 1;
 
 			string filePath = AppDomain.CurrentDomain.BaseDirectory + novel.Name;
-
-			if (novel.Episodes.Count == 0)
-			{
-				novel.UpdateCount = 0;
-				return;
-			}
 
 			if (!Directory.Exists(filePath))
 			{
@@ -291,6 +255,26 @@ namespace NCodeParser.ViewModel
 			var MyDirectory = new DirectoryInfo(filePath);
 			var Files = MyDirectory.GetFiles("*.txt");
 
+			if (novel.Episodes.Count == 0)
+			{
+				var Episodes = await downloadTask;
+
+				if (Episodes != null)
+				{
+					novel.Episodes.Clear();
+					novel.Episodes.AddAll(Episodes);
+				}
+			}
+
+			novel.EpisodeStartIndex = 0;
+			novel.EpisodeEndIndex = novel.Episodes.Count - 1;
+
+			if (novel.Episodes.Count == 0)
+			{
+				novel.UpdateCount = 0;
+				return;
+			}
+			
 			int LastNumber = novel.Episodes[novel.Episodes.Count - 1].Number;
 			int Max = 0;
 
@@ -445,60 +429,33 @@ namespace NCodeParser.ViewModel
 
 		private void OnSelectAll()
 		{
+			if (SelectedNovel == null)
+			{
+				MessageBox.Show("선택된 소설이 없습니다.");
+				return;
+			}
+
 			SelectedNovel.EpisodeStartIndex = 0;
 			SelectedNovel.EpisodeEndIndex = SelectedNovel.Episodes.Count - 1;
 		}
 
-		private bool CanSelectAll()
-		{
-			if (SelectedNovel == null)
-			{
-				return false;
-			}
-
-			if (SelectedNovel.Episodes.Count == 0)
-			{
-				return false;
-			}
-
-			if (!Downloadable)
-			{
-				return false;
-			}
-
-			return true;
-		}
-
 		private async void OnDownload()
 		{
-			Downloading = true;
-			SelectedNovel.ProgressMax = (SelectedNovel.EpisodeEndIndex - SelectedNovel.EpisodeStartIndex) + 1;
-	
-			await Downloader.DownloadNovel(SelectedNovel, SelectedNovel.EpisodeStartIndex, SelectedNovel.EpisodeEndIndex, SelectedNovel.Merging);
-
-			Downloading = false;
-
-			CommandManager.InvalidateRequerySuggested();
-		}
-
-		private bool CanDownload()
-		{
 			if (SelectedNovel == null)
 			{
-				return false;
+				MessageBox.Show("선택된 소설이 없습니다.");
+				return;
 			}
 
 			if (SelectedNovel.Episodes.Count == 0)
 			{
-				return false;
+				MessageBox.Show("다운로드할 수 없습니다.");
+				return;
 			}
 
-			if (!Downloadable)
-			{
-				return false;
-			}
+			SelectedNovel.ProgressMax = (SelectedNovel.EpisodeEndIndex - SelectedNovel.EpisodeStartIndex) + 1;
 
-			return true;
+			await Downloader.DownloadNovel(SelectedNovel, SelectedNovel.EpisodeStartIndex, SelectedNovel.EpisodeEndIndex, SelectedNovel.Merging);
 		}
 
 		private void OnClosing()
