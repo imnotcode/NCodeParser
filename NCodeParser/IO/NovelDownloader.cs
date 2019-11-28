@@ -211,13 +211,13 @@ namespace NCodeParser.IO
 
 			try
 			{
+				if (!loadOnly && !Directory.Exists(novel.Name))
+				{
+					Directory.CreateDirectory(novel.Name);
+				}
+
 				if (novel.Type == NovelType.Normal || novel.Type == NovelType.R18)
 				{
-					if (!Directory.Exists(novel.Name))
-					{
-						Directory.CreateDirectory(novel.Name);
-					}
-
 					var regex1 = new Regex("<p class=\"novel_subtitle\">(.*)</p>", RegexOptions.Compiled);
 					var regex2 = new Regex("\"Lp[0-9]*\">(.*)</p>", RegexOptions.Multiline);
 					var regex3 = new Regex("\"L[0-9]*\">(.*)</p>", RegexOptions.Multiline);
@@ -326,11 +326,6 @@ namespace NCodeParser.IO
 				}
 				else
 				{
-					if (!Directory.Exists(novel.Name))
-					{
-						Directory.CreateDirectory(novel.Name);
-					}
-
 					var Regex1 = new Regex("<p class=\"chapterTitle level1 js-vertical-composition-item\"><span>", RegexOptions.Multiline);
 					var Regex2 = new Regex("<p class=\"widget-episodeTitle js-vertical-composition-item\">", RegexOptions.Multiline);
 					var Regex3 = new Regex("<p id=\"p\\d+\"", RegexOptions.Multiline);
