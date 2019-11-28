@@ -202,7 +202,7 @@
 							</ScrollViewer>
 
 							<Grid Background="#11000000"
-								  Visibility="{Binding SelectedNovel.ShowProgress, Converter={StaticResource VisibleConverter}}">
+								  Visibility="{Binding ShowProgress, Converter={StaticResource VisibleConverter}}">
 								<ProgressBar HorizontalAlignment="Center"
 											 VerticalAlignment="Center"
 											 IsIndeterminate="True"

@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace NCodeParser.IO
 {
@@ -193,9 +194,9 @@ namespace NCodeParser.IO
 					}
 				}
 			}
-			catch
+			catch (Exception e)
 			{
-
+				MessageBox.Show(e.ToString());
 			}
 			finally
 			{
@@ -401,9 +402,9 @@ namespace NCodeParser.IO
 					}
 				}
 			}
-			catch
+			catch (Exception e)
 			{
-
+				MessageBox.Show(e.ToString());
 			}
 			finally
 			{

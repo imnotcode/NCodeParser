@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
@@ -127,6 +128,21 @@ namespace NCodeParser.ViewModel
 			}
 		}
 
+		public bool ShowProgress
+		{
+			get
+			{
+				if (SelectedNovel == null)
+				{
+					return false;
+				}
+				else
+				{
+					return SelectedNovel.ShowProgress;
+				}
+			}
+		}
+
 		public bool Downloadable
 		{
 			get
@@ -211,6 +227,7 @@ namespace NCodeParser.ViewModel
 			if (novel.Episodes.Count > 0 && string.IsNullOrWhiteSpace(novel.Episodes[0].Text))
 			{
 				novel.ShowProgress = true;
+				RaisePropertyChanged(nameof(ShowProgress));
 
 				await Task.Run(() =>
 				{
@@ -220,6 +237,7 @@ namespace NCodeParser.ViewModel
 				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
 
 				novel.ShowProgress = false;
+				RaisePropertyChanged(nameof(ShowProgress));
 			}
 		}
 
@@ -333,6 +351,9 @@ namespace NCodeParser.ViewModel
 			{
 				SelectedNovel = NovelList.FirstOrDefault(R => R.Code == Code1);
 				Code1 = "";
+
+				MessageBox.Show("이미 등록된 소설입니다.");
+
 				return;
 			}
 
@@ -363,6 +384,9 @@ namespace NCodeParser.ViewModel
 			{
 				SelectedNovel = NovelList.FirstOrDefault(R => R.Code == Code2);
 				Code2 = "";
+
+				MessageBox.Show("이미 등록된 소설입니다.");
+
 				return;
 			}
 
@@ -393,6 +417,9 @@ namespace NCodeParser.ViewModel
 			{
 				SelectedNovel = NovelList.FirstOrDefault(R => R.Code == Code3);
 				Code3 = "";
+
+				MessageBox.Show("이미 등록된 소설입니다.");
+
 				return;
 			}
 
