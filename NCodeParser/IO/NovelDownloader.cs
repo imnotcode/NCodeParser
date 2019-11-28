@@ -1,8 +1,5 @@
-﻿using HtmlAgilityPack;
-using NCodeParser.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -11,6 +8,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using HtmlAgilityPack;
+using NCodeParser.Model;
 
 namespace NCodeParser.IO
 {
@@ -28,7 +27,7 @@ namespace NCodeParser.IO
 
 		public event EventHandler<int> ProgressChanged;
 
-		public List<Episode> DownloadList(Novel novel)
+		public async Task<List<Episode>> DownloadList(Novel novel)
 		{
 			Downloading = true;
 
@@ -71,7 +70,7 @@ namespace NCodeParser.IO
 							client.CookieContainer.SetCookies(new Uri(URL), cookieString.ToString());
 						}
 
-						var bytes = client.DownloadData(URL);
+						var bytes = await client.DownloadDataTaskAsync(URL);
 						var downloadedString = Encoding.UTF8.GetString(bytes);
 						var MatchCollection = new Regex("<a href=\"/" + novel.Code + "/([0-9]*)/\">(.*)</a>", RegexOptions.IgnoreCase).Matches(downloadedString);
 
@@ -113,7 +112,7 @@ namespace NCodeParser.IO
 
 						string URL = KakuyomuURL + novel.Code;
 
-						var bytes = client.DownloadData(URL);
+						var bytes = await client.DownloadDataTaskAsync(URL);
 						var downloadedString = Encoding.UTF8.GetString(bytes);
 						var Regex1 = new Regex("\"widget-toc-episode-titleLabel js-vertical-composition-item\">");
 						var Regex2 = new Regex("/episodes/");
@@ -206,7 +205,7 @@ namespace NCodeParser.IO
 			return null;
 		}
 
-		public void DownloadNovel(Novel novel, int startIndex, int endIndex, bool merging, bool loadOnly = false)
+		public async Task DownloadNovel(Novel novel, int startIndex, int endIndex, bool merging, bool loadOnly = false)
 		{
 			Downloading = true;
 
@@ -267,7 +266,7 @@ namespace NCodeParser.IO
 							client.CookieContainer.SetCookies(new Uri(url), cookieString.ToString());
 						}
 
-						var bytes = client.DownloadData(url);
+						var bytes = await client.DownloadDataTaskAsync(url);
 						string input = Encoding.UTF8.GetString(bytes);
 						var collection = regex1.Matches(input);
 
@@ -343,8 +342,7 @@ namespace NCodeParser.IO
 						client.DefaultRequestHeaders.Add("User-Agent", "Other");
 
 						string URL = string.Format($"{KakuyomuURL}{novel.Code}/episodes/{novel.Episodes[i].URLNumber}");
-
-						string input = client.GetStringAsync(URL).Result;
+						string input = await client.GetStringAsync(URL);
 
 						var document = new HtmlDocument();
 						document.LoadHtml(input);

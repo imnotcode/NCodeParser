@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -70,7 +71,7 @@ namespace NCodeParser.ViewModel
 
 				if (SelectedNovel != null)
 				{
-					SelectNovel(SelectedNovel);
+					_ = SelectNovel(SelectedNovel);
 				}
 			}
 		}
@@ -163,7 +164,7 @@ namespace NCodeParser.ViewModel
 		public MainViewModel()
 		{
 			InitInstance();
-			InitControls();
+			_ = InitControls();
 		}
 
 		private void InitInstance()
@@ -182,7 +183,7 @@ namespace NCodeParser.ViewModel
 			INIManager = new INIManager();
 		}
 
-		private void InitControls()
+		private async Task InitControls()
 		{
 			NovelList = new ObservableCollection<Novel>();
 			NovelList.AddAll(INIManager.GetNovels());
@@ -192,10 +193,10 @@ namespace NCodeParser.ViewModel
 				SelectedNovel = NovelList[0];
 			}
 
-			CheckAllUpdate();
+			await CheckAllUpdate();
 		}
 
-		private async void SelectNovel(Novel novel)
+		private async Task SelectNovel(Novel novel)
 		{
 			if (novel == null)
 			{
@@ -229,10 +230,7 @@ namespace NCodeParser.ViewModel
 				novel.ShowProgress = true;
 				RaisePropertyChanged(nameof(ShowProgress));
 
-				await Task.Run(() =>
-				{
-					Downloader.DownloadNovel(novel, 0, 0, false, true);
-				});
+				await Downloader.DownloadNovel(novel, 0, 0, false, true);
 
 				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
 
@@ -241,15 +239,19 @@ namespace NCodeParser.ViewModel
 			}
 		}
 
-		private void CheckAllUpdate()
+		private async Task CheckAllUpdate()
 		{
+			var Tasks = new List<Task>();
+
 			for (int i = 0; i < NovelList.Count; i++)
 			{
-				CheckUpdate(NovelList[i]);
+				Tasks.Add(CheckUpdate(NovelList[i]));
 			}
+
+			await Task.WhenAll(Tasks);
 		}
 
-		private async void CheckUpdate(Novel novel)
+		private async Task CheckUpdate(Novel novel)
 		{
 			if (novel == null)
 			{
@@ -258,10 +260,7 @@ namespace NCodeParser.ViewModel
 
 			if (novel.Episodes.Count == 0)
 			{
-				var Episodes = await Task.Run(() =>
-				{
-					return Downloader.DownloadList(novel);
-				});
+				var Episodes = await Downloader.DownloadList(novel);
 
 				if (Episodes != null)
 				{
@@ -470,20 +469,16 @@ namespace NCodeParser.ViewModel
 			return true;
 		}
 
-		private void OnDownload()
+		private async void OnDownload()
 		{
 			Downloading = true;
-
 			SelectedNovel.ProgressMax = (SelectedNovel.EpisodeEndIndex - SelectedNovel.EpisodeStartIndex) + 1;
+	
+			await Downloader.DownloadNovel(SelectedNovel, SelectedNovel.EpisodeStartIndex, SelectedNovel.EpisodeEndIndex, SelectedNovel.Merging);
 
-			Task.Run(() =>
-			{
-				Downloader.DownloadNovel(SelectedNovel, SelectedNovel.EpisodeStartIndex, SelectedNovel.EpisodeEndIndex, SelectedNovel.Merging);
+			Downloading = false;
 
-				Downloading = false;
-
-				CommandManager.InvalidateRequerySuggested();
-			});
+			CommandManager.InvalidateRequerySuggested();
 		}
 
 		private bool CanDownload()
