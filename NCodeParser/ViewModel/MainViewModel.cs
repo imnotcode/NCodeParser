@@ -8,6 +8,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using NCodeParser.IO;
 using NCodeParser.Model;
+using NCodeParser.View;
 
 namespace NCodeParser.ViewModel
 {
@@ -39,6 +40,12 @@ namespace NCodeParser.ViewModel
 		}
 
 		public RelayCommand ClosingCommand
+		{
+			get;
+			private set;
+		}
+
+		public RelayCommand SettingCommand
 		{
 			get;
 			private set;
@@ -151,6 +158,7 @@ namespace NCodeParser.ViewModel
 			SelectAllCommand = new RelayCommand(OnSelectAll, CanSelectAll);
 			DownloadCommand = new RelayCommand(OnDownload, CanDownload);
 			ClosingCommand = new RelayCommand(OnClosing);
+			SettingCommand = new RelayCommand(OnSetting);
 
 			Downloader = new NovelDownloader();
 			Downloader.ProgressChanged += Downloader_ProgressChanged;
@@ -202,12 +210,16 @@ namespace NCodeParser.ViewModel
 
 			if (novel.Episodes.Count > 0 && string.IsNullOrWhiteSpace(novel.Episodes[0].Text))
 			{
+				novel.ShowProgress = true;
+
 				await Task.Run(() =>
 				{
 					Downloader.DownloadNovel(novel, 0, 0, false, true);
 				});
 
 				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
+
+				novel.ShowProgress = false;
 			}
 		}
 
@@ -470,6 +482,12 @@ namespace NCodeParser.ViewModel
 		private void OnClosing()
 		{
 			INIManager.SetNovels(NovelList);
+		}
+
+		private void OnSetting()
+		{
+			var window = new SettingWindow();
+			window.ShowDialog();
 		}
 
 		private void Downloader_ProgressChanged(object sender, int Value)

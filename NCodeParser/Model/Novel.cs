@@ -161,6 +161,18 @@ namespace NCodeParser.Model
 			}
 		}
 
+		public bool ShowProgress
+		{
+			get
+			{
+				return _ShowProgress;
+			}set
+			{
+				_ShowProgress = value;
+				RaisePropertyChanged();
+			}
+		}
+
 		public ObservableCollection<Episode> Episodes
 		{
 			get; private set;
@@ -176,6 +188,7 @@ namespace NCodeParser.Model
 		private int _ProgressValue;
 		private int _ProgressMax;
 		private bool _Merging;
+		private bool _ShowProgress;
 
 		public Novel()
 		{
