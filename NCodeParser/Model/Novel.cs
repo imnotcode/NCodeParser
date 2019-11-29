@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 using GalaSoft.MvvmLight;
@@ -197,6 +198,19 @@ namespace NCodeParser.Model
 			}
 		}
 
+		public DateTime LastUpdateTime
+		{
+			get
+			{
+				return _LastUpdateTime;
+			}
+			set
+			{
+				_LastUpdateTime = value;
+				RaisePropertyChanged();
+			}
+		}
+
 		public List<Episode> Episodes
 		{
 			get; private set;
@@ -219,6 +233,7 @@ namespace NCodeParser.Model
 		private bool _Merging;
 		private bool _ShowProgress;
 		private bool _Downloading;
+		private DateTime _LastUpdateTime;
 
 		public Novel()
 		{

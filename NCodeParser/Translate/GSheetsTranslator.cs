@@ -13,7 +13,7 @@ using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource.UpdateReq
 
 namespace NCodeParser.Translate
 {
-	public class GSheetsTranslator : ITranslator
+	public class GSheetsTranslator : ITranslator, IDisposable
 	{
 		private readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
 		private readonly string SheetID = "1JZwDTknNzCIpFZNoDLqaWEZcm5oJYUiyD5kPH9T7VAI";
@@ -50,40 +50,41 @@ namespace NCodeParser.Translate
 						new FileDataStore(credPath, true));
 				}
 
-				var sheetService = new SheetsService(new BaseClientService.Initializer()
+				using (var sheetService = new SheetsService(new BaseClientService.Initializer()
 				{
 					HttpClientInitializer = credential,
 					ApplicationName = Config.ApplicationName,
-				});
-
-				rowID = await GetRowID();
-				if (rowID == -1)
+				}))
 				{
-					return input;
-				}
+					rowID = await GetRowID();
+					if (rowID == -1)
+					{
+						return input;
+					}
 
-				string from = "A" + rowID;
-				string to = "E" + rowID;
+					string from = "A" + rowID;
+					string to = "E" + rowID;
 
-				IList<IList<object>> list = new List<IList<object>>();
-				list.Add(new List<object>() { input, "=GOOGLETRANSLATE(" + from + ", \"ja\", \"ko\")" });
+					IList<IList<object>> list = new List<IList<object>>();
+					list.Add(new List<object>() { input, "=GOOGLETRANSLATE(" + from + ", \"ja\", \"ko\")" });
 
-				var range = new ValueRange();
-				range.Values = list;
+					var range = new ValueRange();
+					range.Values = list;
 
-				var request = sheetService.Spreadsheets.Values.Update(range, SheetID, $"{from}:{to}");
-				request.ValueInputOption = ValueInputOptionEnum.USERENTERED;
+					var request = sheetService.Spreadsheets.Values.Update(range, SheetID, $"{from}:{to}");
+					request.ValueInputOption = ValueInputOptionEnum.USERENTERED;
 
-				var response = await request.ExecuteAsync();
+					var response = await request.ExecuteAsync();
 
-				var result = await Load(rowID);
-				if (string.IsNullOrWhiteSpace(result))
-				{
-					return input;
-				}
-				else
-				{
-					return result;
+					var result = await Load(rowID);
+					if (string.IsNullOrWhiteSpace(result))
+					{
+						return input;
+					}
+					else
+					{
+						return result;
+					}
 				}
 			}
 			catch
@@ -115,8 +116,6 @@ namespace NCodeParser.Translate
 					{
 						if (!RowUsages[i])
 						{
-							Console.WriteLine(i + 1);
-
 							RowUsages[i] = true;
 
 							return i + 1;
@@ -162,21 +161,22 @@ namespace NCodeParser.Translate
 						new FileDataStore(credPath, true));
 				}
 
-				var sheetService = new SheetsService(new BaseClientService.Initializer()
+				using (var sheetService = new SheetsService(new BaseClientService.Initializer()
 				{
 					HttpClientInitializer = credential,
 					ApplicationName = Config.ApplicationName,
-				});
+				}))
+				{
+					string from = "A" + rowID;
+					string to = "E" + rowID;
 
-				string from = "A" + rowID;
-				string to = "E" + rowID;
+					var request = sheetService.Spreadsheets.Values.BatchGet(SheetID);
+					request.Ranges = $"{from}:{to}";
 
-				var request = sheetService.Spreadsheets.Values.BatchGet(SheetID);
-				request.Ranges = $"{from}:{to}";
+					var response = await request.ExecuteAsync();
 
-				var response = await request.ExecuteAsync();
-
-				return response.ValueRanges[0].Values[0][1].ToString();
+					return response.ValueRanges[0].Values[0][1].ToString();
+				}
 			}
 			catch
 			{
@@ -184,6 +184,11 @@ namespace NCodeParser.Translate
 			}
 
 			return "";
+		}
+
+		public void Dispose()
+		{
+			// TODO
 		}
 	}
 }

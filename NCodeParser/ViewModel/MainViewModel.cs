@@ -56,6 +56,24 @@ namespace NCodeParser.ViewModel
 			private set;
 		}
 
+		public RelayCommand ExitCommand
+		{
+			get;
+			private set;
+		}
+
+		public RelayCommand ShowLicenseCommand
+		{
+			get;
+			private set;
+		}
+
+		public RelayCommand ShowAboutCommand
+		{
+			get;
+			private set;
+		}
+
 		public RelayCommand SettingCommand
 		{
 			get;
@@ -191,6 +209,9 @@ namespace NCodeParser.ViewModel
 			SelectAllCommand = new RelayCommand(OnSelectAll);
 			DownloadCommand = new RelayCommand(OnDownload);
 			ClosingCommand = new RelayCommand(OnClosing);
+			ExitCommand = new RelayCommand(OnExit);
+			ShowLicenseCommand = new RelayCommand(OnShowLicense);
+			ShowAboutCommand = new RelayCommand(OnShowAbout);
 			SettingCommand = new RelayCommand(OnSetting);
 
 			Downloader = new NovelDownloader();
@@ -235,7 +256,7 @@ namespace NCodeParser.ViewModel
 					novel.Episodes.Clear();
 					novel.Episodes.AddAll(Episodes);
 
-					await App.Current.Dispatcher.InvokeAsync(() =>
+					await App.Current?.Dispatcher.InvokeAsync(() =>
 					{
 						novel.UIEpisodes.Clear();
 						novel.UIEpisodes.AddAll(novel.Episodes);
@@ -310,7 +331,7 @@ namespace NCodeParser.ViewModel
 					novel.Episodes.Clear();
 					novel.Episodes.AddAll(Episodes);
 
-					App.Current.Dispatcher.InvokeAsync(() =>
+					App.Current?.Dispatcher.InvokeAsync(() =>
 					{
 						novel.UIEpisodes.Clear();
 						novel.UIEpisodes.AddAll(novel.Episodes);
@@ -517,6 +538,23 @@ namespace NCodeParser.ViewModel
 		{
 			Config.NovelList = NovelList.ToList();
 			Config.Save();
+		}
+
+		private void OnExit()
+		{
+			App.Current.MainWindow.Close();
+		}
+
+		private void OnShowLicense()
+		{
+			var window = new LicenseWindow();
+			window.ShowDialog();
+		}
+
+		private void OnShowAbout()
+		{
+			var window = new AboutWindow();
+			window.ShowDialog();
 		}
 
 		private void OnSetting()

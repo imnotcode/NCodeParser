@@ -48,7 +48,7 @@
 	<DockPanel>
 		<Menu DockPanel.Dock="Top">
 			<MenuItem Header="File">
-				<MenuItem Header="Exit" />
+				<MenuItem Header="Exit" Command="{Binding ExitCommand}" />
 			</MenuItem>
 
 			<MenuItem Header="Tools">
@@ -56,11 +56,11 @@
 			</MenuItem>
 
 			<MenuItem Header="Help">
-				<MenuItem Header="View License" />
+				<MenuItem Header="View License" Command="{Binding ShowLicenseCommand}" />
 				
 				<Separator />
 				
-				<MenuItem Header="About NCodeParser" />
+				<MenuItem Header="About NCodeParser" Command="{Binding ShowAboutCommand}" />
 			</MenuItem>
 		</Menu>
 
@@ -97,6 +97,16 @@
 						</Setter>
 					</Style>
 				</DataGrid.RowStyle>
+
+				<DataGrid.ContextMenu>
+					<ContextMenu>
+						<MenuItem Header="Open Folder" />
+
+						<Separator />
+
+						<MenuItem Header="Delete" />
+					</ContextMenu>
+				</DataGrid.ContextMenu>
 			</DataGrid>
 
 			<Grid Grid.Column="1"
@@ -196,7 +206,17 @@
 						<RowDefinition />
 					</Grid.RowDefinitions>
 
-					<TextBlock Grid.Row="0" Margin="2,0,0,4" Text="소설 개요" />
+					<Grid Grid.Row="0" Margin="2,0,0,4">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition />
+							<ColumnDefinition />
+							<ColumnDefinition Width="auto" />
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0" HorizontalAlignment="Left" Text="소설 개요" />
+						<TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="마지막 업데이트 : " />
+						<TextBlock Grid.Column="2" HorizontalAlignment="Right" Text="{Binding SelectedNovel.LastUpdateTime}" />
+					</Grid>
 
 					<Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="1">
 						<Grid>

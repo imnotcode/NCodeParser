@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -77,6 +78,21 @@ namespace NCodeParser.IO
 						if (string.IsNullOrWhiteSpace(novel.Desc))
 						{
 							novel.Desc = document.GetElementbyId("novel_ex").InnerText;
+						}
+
+						if (novel.LastUpdateTime == default)
+						{
+							var datetimeString = document.DocumentNode.SelectNodes("//dt[@class='long_update']").Last().InnerText;
+							datetimeString = datetimeString.Replace("\n", "");
+							datetimeString = datetimeString.Replace("（改）", "");
+
+							bool isSuccess = DateTime.TryParseExact(
+								datetimeString, "yyyy'/'MM'/'dd' 'HH':'mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTime);
+
+							if (isSuccess)
+							{
+								novel.LastUpdateTime = dateTime;
+							}
 						}
 
 						var episodes = new List<Episode>();

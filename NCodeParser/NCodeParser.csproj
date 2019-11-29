@@ -116,15 +116,20 @@
     <Compile Include="IO\NovelDownloader.cs" />
     <Compile Include="Model\Episode.cs" />
     <Compile Include="Model\Novel.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="Translate\EZTranslator.cs" />
     <Compile Include="Translate\GSheetsTranslator.cs" />
+    <Compile Include="ViewModel\AboutViewModel.cs" />
     <Compile Include="ViewModel\LicenseViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Options\BaseSettingViewModel.cs" />
     <Compile Include="ViewModel\Options\GeneralSettingViewModel.cs" />
     <Compile Include="ViewModel\Options\TranslateSettingViewModel.cs" />
     <Compile Include="ViewModel\SettingViewModel.cs" />
+    <Compile Include="View\AboutWindow.xaml.cs">
+      <DependentUpon>AboutWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\LicenseWindow.xaml.cs">
       <DependentUpon>LicenseWindow.xaml</DependentUpon>
     </Compile>
@@ -137,6 +142,10 @@
     <Compile Include="View\SettingWindow.xaml.cs">
       <DependentUpon>SettingWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="View\AboutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\LicenseWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
