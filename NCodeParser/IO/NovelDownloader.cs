@@ -21,7 +21,7 @@ namespace NCodeParser.IO
 
 		public event EventHandler<int> ProgressChanged;
 
-		public async Task<List<Episode>> DownloadList(Novel novel)
+		public List<Episode> DownloadList(Novel novel)
 		{
 			try
 			{
@@ -62,7 +62,7 @@ namespace NCodeParser.IO
 							client.CookieContainer.SetCookies(new Uri(URL), cookieString.ToString());
 						}
 
-						var bytes = await client.DownloadDataTaskAsync(URL);
+						var bytes = client.DownloadData(URL);
 						var downloadedString = Encoding.UTF8.GetString(bytes);
 						var MatchCollection = new Regex("<a href=\"/" + novel.Code + "/([0-9]*)/\">(.*)</a>", RegexOptions.IgnoreCase).Matches(downloadedString);
 
@@ -104,7 +104,7 @@ namespace NCodeParser.IO
 
 						string URL = KakuyomuURL + novel.Code;
 
-						var bytes = await client.DownloadDataTaskAsync(URL);
+						var bytes = client.DownloadData(URL);
 						var downloadedString = Encoding.UTF8.GetString(bytes);
 						var Regex1 = new Regex("\"widget-toc-episode-titleLabel js-vertical-composition-item\">");
 						var Regex2 = new Regex("/episodes/");

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 using GalaSoft.MvvmLight;
 
@@ -166,7 +167,8 @@ namespace NCodeParser.Model
 			get
 			{
 				return _ShowProgress;
-			}set
+			}
+			set
 			{
 				_ShowProgress = value;
 				RaisePropertyChanged();
@@ -195,7 +197,12 @@ namespace NCodeParser.Model
 			}
 		}
 
-		public ObservableCollection<Episode> Episodes
+		public List<Episode> Episodes
+		{
+			get; private set;
+		}
+
+		public ObservableCollection<Episode> UIEpisodes
 		{
 			get; private set;
 		}
@@ -215,7 +222,8 @@ namespace NCodeParser.Model
 
 		public Novel()
 		{
-			Episodes = new ObservableCollection<Episode>();
+			Episodes = new List<Episode>();
+			UIEpisodes = new ObservableCollection<Episode>();
 
 			EpisodeStartIndex = -1;
 			EpisodeEndIndex = -1;

@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:NCodeParser"
 		WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
-        Title="NCodeParser"
+        Title="{Binding TitleText, Mode=OneWay}"
         Width="1300"
         Height="800">
 	<Window.DataContext>

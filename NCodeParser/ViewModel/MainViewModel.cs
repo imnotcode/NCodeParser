@@ -133,10 +133,38 @@ namespace NCodeParser.ViewModel
 			}
 		}
 
+		public int UpdateCount
+		{
+			get
+			{
+				return _UpdateCount;
+			}
+			set
+			{
+				if (value > NovelList.Count)
+				{
+					return;
+				}
+
+				_UpdateCount = value;
+				RaisePropertyChanged();
+				RaisePropertyChanged(nameof(TitleText));
+			}
+		}
+
+		public string TitleText
+		{
+			get
+			{
+				return $"NCodeParser ({UpdateCount}/{NovelList.Count})";
+			}
+		}
+
 		private Novel _SelectedNovel;
 		private string _Code1;
 		private string _Code2;
 		private string _Code3;
+		private int _UpdateCount;
 
 		private NovelDownloader Downloader;
 		private INIManager INIManager;
@@ -144,7 +172,7 @@ namespace NCodeParser.ViewModel
 		public MainViewModel()
 		{
 			InitInstance();
-			_ = InitControls();
+			InitControls();
 		}
 
 		private void InitInstance()
@@ -163,7 +191,7 @@ namespace NCodeParser.ViewModel
 			INIManager = new INIManager();
 		}
 
-		private async Task InitControls()
+		private void InitControls()
 		{
 			NovelList = new ObservableCollection<Novel>();
 			NovelList.AddAll(INIManager.GetNovels());
@@ -175,7 +203,7 @@ namespace NCodeParser.ViewModel
 
 			if (!IsInDesignMode)
 			{
-				await CheckAllUpdate();
+				Task.Run(() => CheckAllUpdate());
 			}
 		}
 
@@ -188,14 +216,21 @@ namespace NCodeParser.ViewModel
 
 			if (novel.Episodes.Count == 0)
 			{
-				var Episodes = await Downloader.DownloadList(novel);
+				var Episodes = await Task.Run(() =>
+				{
+					return Downloader.DownloadList(novel);
+				});
 
 				if (Episodes != null)
 				{
 					novel.Episodes.Clear();
 					novel.Episodes.AddAll(Episodes);
 
-					CommandManager.InvalidateRequerySuggested();
+					await App.Current.Dispatcher.InvokeAsync(() =>
+					{
+						novel.UIEpisodes.Clear();
+						novel.UIEpisodes.AddAll(novel.Episodes);
+					});
 				}
 			}
 
@@ -219,29 +254,23 @@ namespace NCodeParser.ViewModel
 			}
 		}
 
-		private async Task CheckAllUpdate()
+		private void CheckAllUpdate()
 		{
-			var Tasks = new List<Task>();
+			UpdateCount = 0;
 
-			for (int i = 0; i < NovelList.Count; i++)
+			Parallel.For(0, NovelList.Count, (i) =>
 			{
-				Tasks.Add(CheckUpdate(NovelList[i]));
-			}
+				CheckUpdate(NovelList[i]);
 
-			await Task.WhenAll(Tasks);
+				UpdateCount++;
+			});
 		}
 
-		private async Task CheckUpdate(Novel novel)
+		private void CheckUpdate(Novel novel)
 		{
 			if (novel == null)
 			{
 				return;
-			}
-
-			Task<List<Episode>> downloadTask = null;
-			if (novel.Episodes.Count == 0)
-			{
-				downloadTask = Downloader.DownloadList(novel);
 			}
 
 			string filePath = AppDomain.CurrentDomain.BaseDirectory + novel.Name;
@@ -257,12 +286,18 @@ namespace NCodeParser.ViewModel
 
 			if (novel.Episodes.Count == 0)
 			{
-				var Episodes = await downloadTask;
+				var Episodes = Downloader.DownloadList(novel);
 
 				if (Episodes != null)
 				{
 					novel.Episodes.Clear();
 					novel.Episodes.AddAll(Episodes);
+
+					App.Current.Dispatcher.InvokeAsync(() =>
+					{
+						novel.UIEpisodes.Clear();
+						novel.UIEpisodes.AddAll(novel.Episodes);
+					});
 				}
 			}
 
@@ -349,6 +384,7 @@ namespace NCodeParser.ViewModel
 			NovelList.Add(Novel);
 
 			Code1 = "";
+			UpdateCount++;
 		}
 
 		private bool CanAdd1()
@@ -382,6 +418,7 @@ namespace NCodeParser.ViewModel
 			NovelList.Add(Novel);
 
 			Code2 = "";
+			UpdateCount++;
 		}
 
 		private bool CanAdd2()
@@ -415,6 +452,7 @@ namespace NCodeParser.ViewModel
 			NovelList.Add(Novel);
 
 			Code3 = "";
+			UpdateCount++;
 		}
 
 		private bool CanAdd3()
