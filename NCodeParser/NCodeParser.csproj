@@ -110,6 +110,7 @@
     <Compile Include="Model\Episode.cs" />
     <Compile Include="Model\Novel.cs" />
     <Compile Include="Singleton.cs" />
+    <Compile Include="Translate\EZTranslator.cs" />
     <Compile Include="Translate\GSheetsTranslator.cs" />
     <Compile Include="ViewModel\LicenseViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />

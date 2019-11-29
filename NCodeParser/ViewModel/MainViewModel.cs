@@ -175,7 +175,6 @@ namespace NCodeParser.ViewModel
 		private int _UpdateCount;
 
 		private NovelDownloader Downloader;
-		private INIManager INIManager;
 		private ITranslator Translator;
 
 		public MainViewModel()
@@ -197,14 +196,14 @@ namespace NCodeParser.ViewModel
 			Downloader = new NovelDownloader();
 			Downloader.ProgressChanged += Downloader_ProgressChanged;
 
-			INIManager = new INIManager();
 			Translator = new GSheetsTranslator();
+			Config.Init();
 		}
 
 		private void InitControls()
 		{
 			NovelList = new ObservableCollection<Novel>();
-			NovelList.AddAll(INIManager.GetNovels());
+			NovelList.AddAll(Config.NovelList);
 
 			if (NovelList.Count > 0)
 			{
@@ -516,7 +515,8 @@ namespace NCodeParser.ViewModel
 
 		private void OnClosing()
 		{
-			INIManager.SetNovels(NovelList);
+			Config.NovelList = NovelList.ToList();
+			Config.Save();
 		}
 
 		private void OnSetting()

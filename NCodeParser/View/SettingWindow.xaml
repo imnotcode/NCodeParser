@@ -4,10 +4,49 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NCodeParser.View"
+		xmlns:ViewModel="clr-namespace:NCodeParser.ViewModel"
 		WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
-        Title="Setting" Height="450" Width="800">
+        Title="Options"
+		Width="1010"
+		Height="606">
+	<Window.DataContext>
+		<ViewModel:SettingViewModel />
+	</Window.DataContext>
+	
     <Grid>
-        
-    </Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="250" />
+			<ColumnDefinition />
+		</Grid.ColumnDefinitions>
+
+		<Grid.RowDefinitions>
+			<RowDefinition />
+			<RowDefinition Height="60" />
+		</Grid.RowDefinitions>
+
+		<Grid Grid.Column="0"
+			  Grid.Row="0">
+			<TreeView Margin="8,8,8,8">
+				<TreeViewItem Header="기본설정">
+					
+				</TreeViewItem>
+				
+				<TreeViewItem Header="번역">
+					
+				</TreeViewItem>
+			</TreeView>
+		</Grid>
+
+		<Grid Grid.Column="1"
+			  Grid.Row="0">
+			
+		</Grid>
+		
+		<Grid Grid.Column="1"
+			  Grid.Row="1">
+			<Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,112,0" Content="OK" Width="85" Height="24" Command="{Binding SaveComamnd}" />
+			<Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0" Content="Cancel" Width="85" Height="24" Command="{Binding CancelCommand}" />
+		</Grid>
+	</Grid>
 </Window>
