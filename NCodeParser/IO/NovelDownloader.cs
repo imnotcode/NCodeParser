@@ -199,6 +199,11 @@ namespace NCodeParser.IO
 
 		public async Task DownloadNovel(Novel novel, int startIndex, int endIndex, bool merging, bool loadOnly = false)
 		{
+			if (novel == null)
+			{
+				return;
+			}
+
 			novel.Downloading = true;
 
 			try
@@ -210,11 +215,6 @@ namespace NCodeParser.IO
 
 				if (novel.Type == NovelType.Normal || novel.Type == NovelType.R18)
 				{
-					var regex1 = new Regex("<p class=\"novel_subtitle\">(.*)</p>", RegexOptions.Compiled);
-					var regex2 = new Regex("\"Lp[0-9]*\">(.*)</p>", RegexOptions.Multiline);
-					var regex3 = new Regex("\"L[0-9]*\">(.*)</p>", RegexOptions.Multiline);
-					var regex4 = new Regex("\"La[0-9]*\">(.*)</p>", RegexOptions.Multiline);
-
 					var dict = new Dictionary<int, string>();
 					int count = 0;
 
@@ -222,142 +222,69 @@ namespace NCodeParser.IO
 					{
 						var builder = new StringBuilder();
 
-						var client = new CookieAwareWebClient();
-						client.Headers.Add("User-Agent: Other");
-						client.UseDefaultCredentials = true;
-
-						string nCodeURL = novel.Type == NovelType.Normal ? this.NCodeURL : NCode18URL;
-						string url = string.Format($"{nCodeURL}{novel.Code}/{novel.Episodes[i].URLNumber}");
-
-						if (novel.Type == NovelType.R18)
+						using (var client = new CookieAwareWebClient())
 						{
-							var Values = new Dictionary<string, string>
-							{
-								{ "over18", "yes" },
-								{ "ks2", "f6argh6akx2" },
-								{ "sasieno", "0" },
-								{ "lineheight", "0" },
-								{ "fontsize", "0" },
-								{ "novellayout", "0" },
-								{ "fix_menu_bar", "1" }
-							};
+							client.Headers.Add("User-Agent: Other");
+							client.UseDefaultCredentials = true;
 
-							var cookieString = new StringBuilder();
-							foreach (var Value in Values)
+							string nCodeURL = novel.Type == NovelType.Normal ? this.NCodeURL : NCode18URL;
+							string url = string.Format($"{nCodeURL}{novel.Code}/{novel.Episodes[i].URLNumber}");
+
+							if (novel.Type == NovelType.R18)
 							{
-								cookieString.Append(Value.Key);
-								cookieString.Append("=");
-								cookieString.Append(Value.Value);
-								cookieString.Append(";");
-								cookieString.Append(" ");
+								var Values = new Dictionary<string, string>
+								{
+									{ "over18", "yes" },
+									{ "ks2", "f6argh6akx2" },
+									{ "sasieno", "0" },
+									{ "lineheight", "0" },
+									{ "fontsize", "0" },
+									{ "novellayout", "0" },
+									{ "fix_menu_bar", "1" }
+								};
+
+								var cookieString = new StringBuilder();
+								foreach (var Value in Values)
+								{
+									cookieString.Append(Value.Key);
+									cookieString.Append("=");
+									cookieString.Append(Value.Value);
+									cookieString.Append(";");
+									cookieString.Append(" ");
+								}
+
+								cookieString = cookieString.Remove(cookieString.Length - 1, 1);
+
+								client.CookieContainer.SetCookies(new Uri(url), cookieString.ToString());
 							}
 
-							cookieString = cookieString.Remove(cookieString.Length - 1, 1);
+							var bytes = await client.DownloadDataTaskAsync(url);
+							string input = Encoding.UTF8.GetString(bytes);
 
-							client.CookieContainer.SetCookies(new Uri(url), cookieString.ToString());
-						}
+							var document = new HtmlDocument();
+							document.LoadHtml(input);
 
-						var bytes = await client.DownloadDataTaskAsync(url);
-						string input = Encoding.UTF8.GetString(bytes);
-						var collection = regex1.Matches(input);
+							builder.Append(document.GetElementbyId("novel_color").InnerText);
 
-						var document = new HtmlDocument();
-						document.LoadHtml(input);
+							var result = builder.ToString();
+							result = result.Replace("&nbsp;", "");
+							result = result.Replace("<ruby>", "");
+							result = result.Replace("</ruby>", "");
+							result = result.Replace("<rp>", "");
+							result = result.Replace("</rp>", "");
+							result = result.Replace("<rb>", "");
+							result = result.Replace("</rb>", "");
+							result = result.Replace("<rt>", "");
+							result = result.Replace("</rt>", "");
+							result = result.Replace("<br />", Environment.NewLine + Environment.NewLine);
+							result = result.Replace("&quot;", "\"");
+							result = result.Replace("&lt;", "<");
+							result = result.Replace("&gt;", ">");
+							result = result.Replace("&quot", "\"");
+							result = result.Replace("&lt", "<");
+							result = result.Replace("&gt", ">");
 
-						builder.Append(document.GetElementbyId("novel_color").InnerText);
-
-						var result = builder.ToString();
-						result = result.Replace("&nbsp;", "");
-						result = result.Replace("<ruby>", "");
-						result = result.Replace("</ruby>", "");
-						result = result.Replace("<rp>", "");
-						result = result.Replace("</rp>", "");
-						result = result.Replace("<rb>", "");
-						result = result.Replace("</rb>", "");
-						result = result.Replace("<rt>", "");
-						result = result.Replace("</rt>", "");
-						result = result.Replace("<br />", Environment.NewLine + Environment.NewLine);
-						result = result.Replace("&quot;", "\"");
-						result = result.Replace("&lt;", "<");
-						result = result.Replace("&gt;", ">");
-						result = result.Replace("&quot", "\"");
-						result = result.Replace("&lt", "<");
-						result = result.Replace("&gt", ">");
-
-						dict.Add(i, result);
-
-						if (loadOnly)
-						{
-							novel.Episodes[i].Text = result;
-						}
-						else if (!merging)
-						{
-							File.WriteAllText(string.Format("{0}\\{1:D4}.txt", novel.Name, i + 1), result, Encoding.UTF8);
-						}
-
-						if (!loadOnly)
-						{
-							ProgressChanged?.Invoke(novel, ++count);
-						}
-
-						if (!loadOnly && merging && count - 1 == endIndex - startIndex)
-						{
-							builder.Clear();
-
-							for (int j = startIndex; j <= endIndex; j++)
-							{
-								builder.Append(dict[j]);
-							}
-
-							result = builder.ToString();
-
-							File.WriteAllText(string.Format("{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
-						}
-					}
-				}
-				else
-				{
-					var Regex1 = new Regex("<p class=\"chapterTitle level1 js-vertical-composition-item\"><span>", RegexOptions.Multiline);
-					var Regex2 = new Regex("<p class=\"widget-episodeTitle js-vertical-composition-item\">", RegexOptions.Multiline);
-					var Regex3 = new Regex("<p id=\"p\\d+\"", RegexOptions.Multiline);
-
-					var dict = new Dictionary<string, string>();
-					int count = 0;
-
-					for (int i = startIndex; i <= endIndex; i++)
-					{
-						var builder = new StringBuilder();
-
-						var client = new HttpClient();
-						client.DefaultRequestHeaders.Add("User-Agent", "Other");
-
-						string URL = string.Format($"{KakuyomuURL}{novel.Code}/episodes/{novel.Episodes[i].URLNumber}");
-						string input = await client.GetStringAsync(URL);
-
-						var document = new HtmlDocument();
-						document.LoadHtml(input);
-
-						builder.Append(document.GetElementbyId("contentMain-inner").InnerText);
-
-						var result = builder.ToString();
-						result = result.Replace("&nbsp;", "");
-						result = result.Replace("<em class=\"emphasisDots\">", "");
-						result = result.Replace("</em>", "");
-						result = result.Replace("<span>", "");
-						result = result.Replace("</span>", "");
-						result = result.Replace("<ruby>", "");
-						result = result.Replace("</ruby>", "");
-						result = result.Replace("<rp>", "");
-						result = result.Replace("</rp>", "");
-						result = result.Replace("<rb>", "");
-						result = result.Replace("</rb>", "");
-						result = result.Replace("<rt>", "");
-						result = result.Replace("</rt>", "");
-						result = result.Replace("<br />", "\r\n");
-
-						if (!dict.ContainsKey(novel.Episodes[i].URLNumber))
-						{
-							dict.Add(novel.Episodes[i].URLNumber, result);
+							dict.Add(i, result);
 
 							if (loadOnly)
 							{
@@ -367,25 +294,97 @@ namespace NCodeParser.IO
 							{
 								File.WriteAllText(string.Format("{0}\\{1:D4}.txt", novel.Name, i + 1), result, Encoding.UTF8);
 							}
-						}
 
-						if (!loadOnly)
-						{
-							ProgressChanged?.Invoke(novel, ++count);
-						}
-
-						if (!loadOnly && merging && count - 1 == endIndex - startIndex)
-						{
-							builder.Clear();
-
-							for (int j = startIndex; j <= endIndex; j++)
+							if (!loadOnly)
 							{
-								builder.Append(dict[novel.Episodes[j].URLNumber]);
+								ProgressChanged?.Invoke(novel, ++count);
 							}
 
-							result = builder.ToString();
+							if (!loadOnly && merging && count - 1 == endIndex - startIndex)
+							{
+								builder.Clear();
 
-							File.WriteAllText(string.Format("{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
+								for (int j = startIndex; j <= endIndex; j++)
+								{
+									builder.Append(dict[j]);
+								}
+
+								result = builder.ToString();
+
+								File.WriteAllText(string.Format("{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
+							}
+						}
+					}
+				}
+				else
+				{
+					var dict = new Dictionary<string, string>();
+					int count = 0;
+
+					for (int i = startIndex; i <= endIndex; i++)
+					{
+						var builder = new StringBuilder();
+
+						using (var client = new HttpClient())
+						{
+							client.DefaultRequestHeaders.Add("User-Agent", "Other");
+
+							string URL = string.Format($"{KakuyomuURL}{novel.Code}/episodes/{novel.Episodes[i].URLNumber}");
+							string input = await client.GetStringAsync(URL);
+
+							var document = new HtmlDocument();
+							document.LoadHtml(input);
+
+							builder.Append(document.GetElementbyId("contentMain-inner").InnerText);
+
+							var result = builder.ToString();
+							result = result.Replace("&nbsp;", "");
+							result = result.Replace("<em class=\"emphasisDots\">", "");
+							result = result.Replace("</em>", "");
+							result = result.Replace("<span>", "");
+							result = result.Replace("</span>", "");
+							result = result.Replace("<ruby>", "");
+							result = result.Replace("</ruby>", "");
+							result = result.Replace("<rp>", "");
+							result = result.Replace("</rp>", "");
+							result = result.Replace("<rb>", "");
+							result = result.Replace("</rb>", "");
+							result = result.Replace("<rt>", "");
+							result = result.Replace("</rt>", "");
+							result = result.Replace("<br />", "\r\n");
+
+							if (!dict.ContainsKey(novel.Episodes[i].URLNumber))
+							{
+								dict.Add(novel.Episodes[i].URLNumber, result);
+
+								if (loadOnly)
+								{
+									novel.Episodes[i].Text = result;
+								}
+								else if (!merging)
+								{
+									File.WriteAllText(string.Format("{0}\\{1:D4}.txt", novel.Name, i + 1), result, Encoding.UTF8);
+								}
+							}
+
+							if (!loadOnly)
+							{
+								ProgressChanged?.Invoke(novel, ++count);
+							}
+
+							if (!loadOnly && merging && count - 1 == endIndex - startIndex)
+							{
+								builder.Clear();
+
+								for (int j = startIndex; j <= endIndex; j++)
+								{
+									builder.Append(dict[novel.Episodes[j].URLNumber]);
+								}
+
+								result = builder.ToString();
+
+								File.WriteAllText(string.Format("{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
+							}
 						}
 					}
 				}

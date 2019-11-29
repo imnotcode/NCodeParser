@@ -3,8 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:local="clr-namespace:NCodeParser.View"
 		xmlns:ViewModel="clr-namespace:NCodeParser.ViewModel"
+		xmlns:OptionsView="clr-namespace:NCodeParser.View.Options"
+		xmlns:OptionsViewModel="clr-namespace:NCodeParser.ViewModel.Options"
 		WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
         Title="Options"
@@ -13,8 +16,18 @@
 	<Window.DataContext>
 		<ViewModel:SettingViewModel />
 	</Window.DataContext>
-	
-    <Grid>
+
+	<Window.Resources>
+		<DataTemplate DataType="{x:Type OptionsViewModel:GeneralSettingViewModel}">
+			<OptionsView:GeneralSettingWindow />
+		</DataTemplate>
+
+		<DataTemplate DataType="{x:Type OptionsViewModel:TranslateSettingViewModel}">
+			<OptionsView:TranslateSettingWindow />
+		</DataTemplate>
+	</Window.Resources>
+
+	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="250" />
 			<ColumnDefinition />
@@ -27,22 +40,33 @@
 
 		<Grid Grid.Column="0"
 			  Grid.Row="0">
-			<TreeView Margin="8,8,8,8">
+			<TreeView x:Name="Tree"
+					  Margin="8,8,8,8"
+					  BorderBrush="LightGray"
+					  BorderThickness="2">
+				<i:Interaction.Triggers>
+					<i:EventTrigger EventName="SelectedItemChanged">
+						<i:InvokeCommandAction Command="{Binding TreeChangedCommand}"
+												   CommandParameter="{Binding ElementName=Tree}" />
+					</i:EventTrigger>
+				</i:Interaction.Triggers>
+
 				<TreeViewItem Header="기본설정">
-					
+
 				</TreeViewItem>
-				
+
 				<TreeViewItem Header="번역">
-					
+
 				</TreeViewItem>
 			</TreeView>
 		</Grid>
 
 		<Grid Grid.Column="1"
 			  Grid.Row="0">
-			
+			<ContentControl Margin="8,4,4,4"
+							Content="{Binding CurrentViewModel}" />
 		</Grid>
-		
+
 		<Grid Grid.Column="1"
 			  Grid.Row="1">
 			<Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,112,0" Content="OK" Width="85" Height="24" Command="{Binding SaveComamnd}" />
