@@ -1,6 +1,6 @@
 # NCodeParser
 
-원본 : https://subnick.blog.me/220692374975
+
 
 ## Prerequisites
 
