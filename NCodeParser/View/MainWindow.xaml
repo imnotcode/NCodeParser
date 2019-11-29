@@ -51,7 +51,9 @@
 				<MenuItem Header="Exit" />
 			</MenuItem>
 
-			<MenuItem Header="Settings" Command="{Binding SettingCommand}" />
+			<MenuItem Header="Tools">
+				<MenuItem Header="Options..." Command="{Binding SettingCommand}" />
+			</MenuItem>
 
 			<MenuItem Header="Help">
 				<MenuItem Header="View License" />
@@ -77,6 +79,7 @@
                       SelectedItem="{Binding SelectedNovel}"
 					  ColumnHeaderStyle="{StaticResource ColumnHeaderStyle}"
 					  CellStyle="{StaticResource DataGridCellStyle}"
+					  SelectionMode="Single"
 					  RowHeight="26">
 				<DataGrid.Columns>
 					<DataGridTextColumn Width="80" Header="Code" IsReadOnly="True" Binding="{Binding Code, UpdateSourceTrigger=PropertyChanged}" />
@@ -151,7 +154,7 @@
 						<ComboBox VerticalContentAlignment="Center"
 								  Margin="0,8,0,0"
 								  Height="26"
-								  IsEnabled="{Binding Downloadable}"
+								  IsEnabled="{Binding SelectedNovel.Downloadable}"
 								  ItemsSource="{Binding SelectedNovel.Episodes}"
 								  SelectedIndex="{Binding SelectedNovel.EpisodeStartIndex}" />
 
@@ -161,7 +164,7 @@
 
 						<ComboBox VerticalContentAlignment="Center"
 								  Height="26"
-								  IsEnabled="{Binding Downloadable}"
+								  IsEnabled="{Binding SelectedNovel.Downloadable}"
 								  ItemsSource="{Binding SelectedNovel.Episodes}"
 								  SelectedIndex="{Binding SelectedNovel.EpisodeEndIndex}" />
 
@@ -179,9 +182,9 @@
 									<RowDefinition />
 								</Grid.RowDefinitions>
 
-								<CheckBox Grid.Row="0" Margin="0,4,0,4" Content="Intro 받기" IsEnabled="{Binding Downloadable}" />
-								<CheckBox Grid.Row="1" Margin="0,4,0,4" Content="작가 코멘트" IsEnabled="{Binding Downloadable}" />
-								<CheckBox Grid.Row="2" Margin="0,4,0,4" Content="단일파일 기록" IsEnabled="{Binding Downloadable}" IsChecked="{Binding SelectedNovel.Merging}" />
+								<CheckBox Grid.Row="0" Margin="0,4,0,4" Content="Intro 받기" IsEnabled="{Binding SelectedNovel.Downloadable}" />
+								<CheckBox Grid.Row="1" Margin="0,4,0,4" Content="작가 코멘트" IsEnabled="{Binding SelectedNovel.Downloadable}" />
+								<CheckBox Grid.Row="2" Margin="0,4,0,4" Content="단일파일 기록" IsEnabled="{Binding SelectedNovel.Downloadable}" IsChecked="{Binding SelectedNovel.Merging}" />
 							</Grid>
 						</Grid>
 					</StackPanel>

@@ -10,8 +10,10 @@ using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
+using NCodeParser.Interface;
 using NCodeParser.IO;
 using NCodeParser.Model;
+using NCodeParser.Translate;
 using NCodeParser.View;
 
 namespace NCodeParser.ViewModel
@@ -20,27 +22,32 @@ namespace NCodeParser.ViewModel
 	{
 		public RelayCommand AddCommand1
 		{
-			get; private set;
+			get;
+			private set;
 		}
 
 		public RelayCommand AddCommand2
 		{
-			get; private set;
+			get;
+			private set;
 		}
 
 		public RelayCommand AddCommand3
 		{
-			get; private set;
+			get;
+			private set;
 		}
 
 		public RelayCommand SelectAllCommand
 		{
-			get; private set;
+			get;
+			private set;
 		}
 
 		public RelayCommand DownloadCommand
 		{
-			get; private set;
+			get;
+			private set;
 		}
 
 		public RelayCommand ClosingCommand
@@ -57,7 +64,8 @@ namespace NCodeParser.ViewModel
 
 		public ObservableCollection<Novel> NovelList
 		{
-			get; private set;
+			get;
+			private set;
 		}
 
 		public Novel SelectedNovel
@@ -72,9 +80,9 @@ namespace NCodeParser.ViewModel
 				RaisePropertyChanged();
 				RaisePropertyChanged(nameof(DownloadCommand));
 
-				if (SelectedNovel != null)
+				if (value != null)
 				{
-					_ = SelectNovel(SelectedNovel);
+					_ = SelectNovel(value);
 				}
 			}
 		}
@@ -168,6 +176,7 @@ namespace NCodeParser.ViewModel
 
 		private NovelDownloader Downloader;
 		private INIManager INIManager;
+		private ITranslator Translator;
 
 		public MainViewModel()
 		{
@@ -189,6 +198,7 @@ namespace NCodeParser.ViewModel
 			Downloader.ProgressChanged += Downloader_ProgressChanged;
 
 			INIManager = new INIManager();
+			Translator = new GSheetsTranslator();
 		}
 
 		private void InitControls()
@@ -251,6 +261,14 @@ namespace NCodeParser.ViewModel
 
 				novel.ShowProgress = false;
 				RaisePropertyChanged(nameof(ShowProgress));
+
+				var task1 = Translator.Translate(novel.Desc);
+				var task2 = Translator.Translate(novel.Episodes[0].Text);
+
+				novel.Desc = await task1;
+				novel.Episodes[0].Text = await task2;
+
+				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
 			}
 		}
 
@@ -281,8 +299,8 @@ namespace NCodeParser.ViewModel
 				return;
 			}
 
-			var MyDirectory = new DirectoryInfo(filePath);
-			var Files = MyDirectory.GetFiles("*.txt");
+			var myDirectory = new DirectoryInfo(filePath);
+			var files = myDirectory.GetFiles("*.txt");
 
 			if (novel.Episodes.Count == 0)
 			{
@@ -309,53 +327,53 @@ namespace NCodeParser.ViewModel
 				novel.UpdateCount = 0;
 				return;
 			}
-			
-			int LastNumber = novel.Episodes[novel.Episodes.Count - 1].Number;
-			int Max = 0;
 
-			for (int i = 0; i < Files.Length; i++)
+			int lastNumber = novel.Episodes[novel.Episodes.Count - 1].Number;
+			int max = 0;
+
+			for (int i = 0; i < files.Length; i++)
 			{
-				var FileName = Path.GetFileNameWithoutExtension(Files[i].FullName);
+				var fileName = Path.GetFileNameWithoutExtension(files[i].FullName);
 
-				int Number;
-				bool IsSuccess;
+				int number;
+				bool isSuccess;
 
-				if (FileName.Contains("~"))
+				if (fileName.Contains("~"))
 				{
-					var SplitStrings = FileName.Split('~');
+					var splitStrings = fileName.Split('~');
 
-					IsSuccess = int.TryParse(SplitStrings[SplitStrings.Length - 1], out Number);
-					if (IsSuccess && LastNumber == Number)
+					isSuccess = int.TryParse(splitStrings[splitStrings.Length - 1], out number);
+					if (isSuccess && lastNumber == number)
 					{
-						Max = LastNumber;
+						max = lastNumber;
 						break;
 					}
 
-					if (IsSuccess && Max < Number)
+					if (isSuccess && max < number)
 					{
-						Max = Number;
+						max = number;
 					}
 				}
 
-				IsSuccess = int.TryParse(FileName, out Number);
-				if (!IsSuccess)
+				isSuccess = int.TryParse(fileName, out number);
+				if (!isSuccess)
 				{
 					continue;
 				}
 
-				if (LastNumber == Number)
+				if (lastNumber == number)
 				{
-					Max = LastNumber;
+					max = lastNumber;
 					break;
 				}
 
-				if (Max < Number)
+				if (max < number)
 				{
-					Max = Number;
+					max = number;
 				}
 			}
 
-			novel.UpdateCount = LastNumber - Max;
+			novel.UpdateCount = lastNumber - max;
 
 			if (novel.UpdateCount > 0)
 			{
@@ -375,13 +393,13 @@ namespace NCodeParser.ViewModel
 				return;
 			}
 
-			var Novel = new Novel
+			var novel = new Novel
 			{
 				Type = NovelType.Normal,
 				Code = Code1
 			};
 
-			NovelList.Add(Novel);
+			NovelList.Add(novel);
 
 			Code1 = "";
 			UpdateCount++;
@@ -409,13 +427,13 @@ namespace NCodeParser.ViewModel
 				return;
 			}
 
-			var Novel = new Novel
+			var novel = new Novel
 			{
 				Type = NovelType.R18,
 				Code = Code2
 			};
 
-			NovelList.Add(Novel);
+			NovelList.Add(novel);
 
 			Code2 = "";
 			UpdateCount++;
@@ -443,13 +461,13 @@ namespace NCodeParser.ViewModel
 				return;
 			}
 
-			var Novel = new Novel
+			var novel = new Novel
 			{
 				Type = NovelType.Kakuyomu,
 				Code = Code3
 			};
 
-			NovelList.Add(Novel);
+			NovelList.Add(novel);
 
 			Code3 = "";
 			UpdateCount++;
@@ -509,8 +527,8 @@ namespace NCodeParser.ViewModel
 
 		private void Downloader_ProgressChanged(object sender, int Value)
 		{
-			var Novel = sender as Novel;
-			Novel.ProgressValue = Value;
+			var novel = sender as Novel;
+			novel.ProgressValue = Value;
 		}
 	}
 }
