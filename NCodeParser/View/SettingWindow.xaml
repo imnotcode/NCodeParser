@@ -55,8 +55,18 @@
 
 				</TreeViewItem>
 
-				<TreeViewItem Header="번역">
+				<TreeViewItem Header="번역" IsExpanded="True">
+					<TreeViewItem Header="일반설정">
+						
+					</TreeViewItem>
 
+					<TreeViewItem Header="Google Sheets">
+
+					</TreeViewItem>
+
+					<TreeViewItem Header="Google Translator">
+
+					</TreeViewItem>
 				</TreeViewItem>
 			</TreeView>
 		</Grid>

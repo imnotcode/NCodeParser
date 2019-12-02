@@ -2,25 +2,25 @@
 
 namespace NCodeParser.Model
 {
-    public class Episode : ObservableObject
-    {
-        public int Number
-        {
-            get { return _Number; }
-            set
-            {
-                _Number = value; RaisePropertyChanged();
-            }
-        }
+	public class Episode : ObservableObject
+	{
+		public int Number
+		{
+			get { return _Number; }
+			set
+			{
+				_Number = value; RaisePropertyChanged();
+			}
+		}
 
-        public string Title
-        {
-            get { return _Title; }
-            set
-            {
-                _Title = value; RaisePropertyChanged();
-            }
-        }
+		public string Title
+		{
+			get { return _Title; }
+			set
+			{
+				_Title = value; RaisePropertyChanged();
+			}
+		}
 
 		public string URLNumber
 		{
@@ -48,14 +48,14 @@ namespace NCodeParser.Model
 			}
 		}
 
-        private int _Number;
-        private string _Title;
+		private int _Number;
+		private string _Title;
 		private string _URLNumber;
 		private string _Text;
 
-        public override string ToString()
-        {
-            return $"{Number} : {Title}";
-        }
-    }
+		public override string ToString()
+		{
+			return $"{Number} : {Title}";
+		}
+	}
 }
