@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CA1056: URI 속성은 문자열이 아니어야 합니다.
+dotnet_diagnostic.CA1056.severity = none

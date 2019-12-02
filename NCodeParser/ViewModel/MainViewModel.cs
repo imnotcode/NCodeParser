@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
-using NCodeParser.Interface;
+using NCodeParser.Interfaces;
 using NCodeParser.IO;
 using NCodeParser.Model;
 using NCodeParser.Translate;
@@ -249,7 +249,7 @@ namespace NCodeParser.ViewModel
 				var Episodes = await Task.Run(() =>
 				{
 					return Downloader.DownloadList(novel);
-				});
+				}).ConfigureAwait(false);
 
 				if (Episodes != null)
 				{
@@ -275,7 +275,7 @@ namespace NCodeParser.ViewModel
 				novel.ShowProgress = true;
 				RaisePropertyChanged(nameof(ShowProgress));
 
-				await Downloader.DownloadNovel(novel, 0, 0, false, true);
+				await Downloader.DownloadNovel(novel, 0, 0, false, true).ConfigureAwait(false);
 
 				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
 
@@ -285,8 +285,8 @@ namespace NCodeParser.ViewModel
 				var task1 = Translator.Translate(novel.Desc);
 				var task2 = Translator.Translate(novel.Episodes[0].Text);
 
-				novel.Desc = await task1;
-				novel.Episodes[0].Text = await task2;
+				novel.Desc = await task1.ConfigureAwait(false);
+				novel.Episodes[0].Text = await task2.ConfigureAwait(false);
 
 				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
 			}
@@ -529,9 +529,14 @@ namespace NCodeParser.ViewModel
 				return;
 			}
 
-			SelectedNovel.ProgressMax = (SelectedNovel.EpisodeEndIndex - SelectedNovel.EpisodeStartIndex) + 1;
+			var novel = SelectedNovel;
+			int startIndex = novel.EpisodeStartIndex;
+			int endIndex = novel.EpisodeEndIndex;
 
-			await Downloader.DownloadNovel(SelectedNovel, SelectedNovel.EpisodeStartIndex, SelectedNovel.EpisodeEndIndex, SelectedNovel.Merging);
+			novel.ProgressMax = (endIndex - startIndex) + 1;
+
+			await Downloader.DownloadNovel(
+				novel, startIndex, endIndex, novel.Merging).ConfigureAwait(false);
 		}
 
 		private void OnClosing()

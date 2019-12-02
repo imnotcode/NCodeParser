@@ -108,7 +108,7 @@
     <Compile Include="Control\Converter\VisibilityConverter.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Interface\ITranslator.cs" />
+    <Compile Include="Interfaces\ITranslator.cs" />
     <Compile Include="IO\CookieAwareWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -117,7 +117,6 @@
     <Compile Include="Model\Episode.cs" />
     <Compile Include="Model\Novel.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="Singleton.cs" />
     <Compile Include="Translate\EZTranslator.cs" />
     <Compile Include="Translate\GSheetsTranslator.cs" />
     <Compile Include="ViewModel\AboutViewModel.cs" />
@@ -193,6 +192,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include=".editorconfig" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

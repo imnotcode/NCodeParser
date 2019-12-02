@@ -24,6 +24,11 @@ namespace NCodeParser.IO
 
 		public List<Episode> DownloadList(Novel novel)
 		{
+			if (novel == null)
+			{
+				throw new ArgumentNullException(nameof(novel), "Parameter cannot be null");
+			}
+
 			try
 			{
 				if (novel.Type == NovelType.Normal || novel.Type == NovelType.R18)
@@ -229,10 +234,11 @@ namespace NCodeParser.IO
 					Directory.CreateDirectory(novel.Name);
 				}
 
+				int count = 0;
+
 				if (novel.Type == NovelType.Normal || novel.Type == NovelType.R18)
 				{
 					var dict = new Dictionary<int, string>();
-					int count = 0;
 
 					for (int i = startIndex; i <= endIndex; i++)
 					{
@@ -244,7 +250,7 @@ namespace NCodeParser.IO
 							client.UseDefaultCredentials = true;
 
 							string nCodeURL = novel.Type == NovelType.Normal ? this.NCodeURL : NCode18URL;
-							string url = string.Format($"{nCodeURL}{novel.Code}/{novel.Episodes[i].URLNumber}");
+							string url = $"{nCodeURL}{novel.Code}/{novel.Episodes[i].URLNumber}";
 
 							if (novel.Type == NovelType.R18)
 							{
@@ -274,7 +280,7 @@ namespace NCodeParser.IO
 								client.CookieContainer.SetCookies(new Uri(url), cookieString.ToString());
 							}
 
-							var bytes = await client.DownloadDataTaskAsync(url);
+							var bytes = await client.DownloadDataTaskAsync(url).ConfigureAwait(false);
 							string input = Encoding.UTF8.GetString(bytes);
 
 							var document = new HtmlDocument();
@@ -308,7 +314,7 @@ namespace NCodeParser.IO
 							}
 							else if (!merging)
 							{
-								File.WriteAllText(string.Format("{0}\\{1:D4}.txt", novel.Name, i + 1), result, Encoding.UTF8);
+								File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}.txt", novel.Name, i + 1), result, Encoding.UTF8);
 							}
 
 							if (!loadOnly)
@@ -327,7 +333,7 @@ namespace NCodeParser.IO
 
 								result = builder.ToString();
 
-								File.WriteAllText(string.Format("{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
+								File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
 							}
 						}
 					}
@@ -335,7 +341,6 @@ namespace NCodeParser.IO
 				else
 				{
 					var dict = new Dictionary<string, string>();
-					int count = 0;
 
 					for (int i = startIndex; i <= endIndex; i++)
 					{
@@ -345,8 +350,8 @@ namespace NCodeParser.IO
 						{
 							client.DefaultRequestHeaders.Add("User-Agent", "Other");
 
-							string URL = string.Format($"{KakuyomuURL}{novel.Code}/episodes/{novel.Episodes[i].URLNumber}");
-							string input = await client.GetStringAsync(URL);
+							string URL = $"{KakuyomuURL}{novel.Code}/episodes/{novel.Episodes[i].URLNumber}";
+							string input = await client.GetStringAsync(new Uri(URL)).ConfigureAwait(false);
 
 							var document = new HtmlDocument();
 							document.LoadHtml(input);
@@ -379,7 +384,7 @@ namespace NCodeParser.IO
 								}
 								else if (!merging)
 								{
-									File.WriteAllText(string.Format("{0}\\{1:D4}.txt", novel.Name, i + 1), result, Encoding.UTF8);
+									File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}.txt", novel.Name, i + 1), result, Encoding.UTF8);
 								}
 							}
 
@@ -399,7 +404,7 @@ namespace NCodeParser.IO
 
 								result = builder.ToString();
 
-								File.WriteAllText(string.Format("{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
+								File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
 							}
 						}
 					}

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using NCodeParser.Interface;
+using NCodeParser.Interfaces;
 
 namespace NCodeParser.Translate
 {

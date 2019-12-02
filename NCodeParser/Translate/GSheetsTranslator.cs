@@ -8,7 +8,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Util.Store;
-using NCodeParser.Interface;
+using NCodeParser.Interfaces;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource.UpdateRequest;
 
 namespace NCodeParser.Translate
@@ -28,7 +28,7 @@ namespace NCodeParser.Translate
 
 			try
 			{
-				await MainSemaphore.WaitAsync();
+				await MainSemaphore.WaitAsync().ConfigureAwait(false);
 
 				UserCredential credential;
 
@@ -47,7 +47,7 @@ namespace NCodeParser.Translate
 						Scopes,
 						"user",
 						CancellationToken.None,
-						new FileDataStore(credPath, true));
+						new FileDataStore(credPath, true)).ConfigureAwait(false);
 				}
 
 				using (var sheetService = new SheetsService(new BaseClientService.Initializer()
@@ -56,7 +56,7 @@ namespace NCodeParser.Translate
 					ApplicationName = Config.ApplicationName,
 				}))
 				{
-					rowID = await GetRowID();
+					rowID = await GetRowID().ConfigureAwait(false);
 					if (rowID == -1)
 					{
 						return input;
@@ -74,9 +74,9 @@ namespace NCodeParser.Translate
 					var request = sheetService.Spreadsheets.Values.Update(range, SheetID, $"{from}:{to}");
 					request.ValueInputOption = ValueInputOptionEnum.USERENTERED;
 
-					var response = await request.ExecuteAsync();
+					var response = await request.ExecuteAsync().ConfigureAwait(false);
 
-					var result = await Load(rowID);
+					var result = await Load(rowID).ConfigureAwait(false);
 					if (string.IsNullOrWhiteSpace(result))
 					{
 						return input;
@@ -108,7 +108,7 @@ namespace NCodeParser.Translate
 		{
 			try
 			{
-				await IDSemaphore.WaitAsync();
+				await IDSemaphore.WaitAsync().ConfigureAwait(false);
 
 				while (true)
 				{
@@ -122,7 +122,7 @@ namespace NCodeParser.Translate
 						}
 					}
 
-					await Task.Delay(500);
+					await Task.Delay(500).ConfigureAwait(false);
 				}
 			}
 			catch
@@ -158,7 +158,7 @@ namespace NCodeParser.Translate
 						Scopes,
 						"user",
 						CancellationToken.None,
-						new FileDataStore(credPath, true));
+						new FileDataStore(credPath, true)).ConfigureAwait(false);
 				}
 
 				using (var sheetService = new SheetsService(new BaseClientService.Initializer()
@@ -173,7 +173,7 @@ namespace NCodeParser.Translate
 					var request = sheetService.Spreadsheets.Values.BatchGet(SheetID);
 					request.Ranges = $"{from}:{to}";
 
-					var response = await request.ExecuteAsync();
+					var response = await request.ExecuteAsync().ConfigureAwait(false);
 
 					return response.ValueRanges[0].Values[0][1].ToString();
 				}

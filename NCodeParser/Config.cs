@@ -11,7 +11,7 @@ namespace NCodeParser
 {
 	public static class Config
 	{
-		public static string ApplicationName = Assembly.GetEntryAssembly().GetName().Name;
+		public static readonly string ApplicationName = Assembly.GetEntryAssembly().GetName().Name;
 
 		public static INIManager INIManager
 		{

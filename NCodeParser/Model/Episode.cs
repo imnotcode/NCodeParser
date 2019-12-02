@@ -55,7 +55,7 @@ namespace NCodeParser.Model
 
         public override string ToString()
         {
-            return string.Format($"{Number} : {Title}");
+            return $"{Number} : {Title}";
         }
     }
 }

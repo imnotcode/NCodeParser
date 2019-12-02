@@ -10,7 +10,7 @@ namespace NCodeParser
 	public static class NativeMethods
 	{
 		[DllImport("kernel32.dll")]
-		public static extern IntPtr LoadLibrary(String fileName);
+		public static extern IntPtr LoadLibrary(string fileName);
 
 		[DllImport("kernel32.dll", EntryPoint = "GetProcAddress", CharSet = CharSet.Ansi)]
 		public static extern IntPtr GetProcAddress(IntPtr hwnd, string procedureName);
