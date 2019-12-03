@@ -151,6 +151,7 @@
     <Compile Include="Translate\GoogleTranslator.cs" />
     <Compile Include="Translate\GSheetsTranslator.cs" />
     <Compile Include="ViewModel\AboutViewModel.cs" />
+    <Compile Include="ViewModel\ExplorerViewModel.cs" />
     <Compile Include="ViewModel\LicenseViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Options\BaseSettingViewModel.cs" />
@@ -159,6 +160,9 @@
     <Compile Include="ViewModel\SettingViewModel.cs" />
     <Compile Include="View\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ExplorerWindow.xaml.cs">
+      <DependentUpon>ExplorerWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\LicenseWindow.xaml.cs">
       <DependentUpon>LicenseWindow.xaml</DependentUpon>
@@ -173,6 +177,10 @@
       <DependentUpon>SettingWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="View\AboutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ExplorerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

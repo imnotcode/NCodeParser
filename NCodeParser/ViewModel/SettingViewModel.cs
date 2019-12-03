@@ -110,12 +110,12 @@ namespace NCodeParser.ViewModel
 
 		private void OnSave()
 		{
-
+			// TODO
 		}
 
 		private void OnCancel()
 		{
-
+			// TODO
 		}
 	}
 }
