@@ -29,6 +29,38 @@ namespace NCodeParser.IO
 			}
 		}
 
+		public void Clear()
+		{
+			NovelData.Sections.Clear();
+
+			Parser.WriteFile(NovelDataPath, NovelData, Encoding.UTF8);
+		}
+
+		public string GetNovelPath()
+		{
+			var novelPath = NovelData["General"]["NovelPath"];
+
+			return novelPath;
+		}
+
+		public bool SetNovelPath(string novelPath)
+		{
+			try
+			{
+				NovelData["General"]["NovelPath"] = novelPath;
+
+				Parser.WriteFile(NovelDataPath, NovelData, Encoding.UTF8);
+
+				return true;
+			}
+			catch
+			{
+
+			}
+
+			return false;
+		}
+
 		public List<Novel> GetNovels()
 		{
 			var NovelList = new List<Novel>();
@@ -70,8 +102,6 @@ namespace NCodeParser.IO
 		{
 			try
 			{
-				NovelData.Sections.Clear();
-
 				for (int i = 0; i < Novels.Count; i++)
 				{
 					if (string.IsNullOrWhiteSpace(Novels[i].Code))

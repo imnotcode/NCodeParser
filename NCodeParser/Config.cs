@@ -21,17 +21,39 @@ namespace NCodeParser
 
 		public static List<Novel> NovelList = new List<Novel>();
 
-		public static string NovelDirectory = "";
+		public static string NovelPath
+		{
+			get
+			{
+				return _NovelPath;
+			}
+			set
+			{
+				if (!string.IsNullOrWhiteSpace(value) && value.Last() != '\\')
+				{
+					_NovelPath = value + "\\";
+				}
+				else
+				{
+					_NovelPath = value;
+				}
+			}
+		}
+
+		private static string _NovelPath = "";
 
 		public static void Init()
 		{
 			INIManager = new INIManager();
 
+			NovelPath = INIManager.GetNovelPath();
 			NovelList = INIManager.GetNovels();
 		}
 
 		public static void Save()
 		{
+			INIManager.Clear();
+			INIManager.SetNovelPath(NovelPath);
 			INIManager.SetNovels(NovelList);
 		}
 	}

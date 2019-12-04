@@ -110,12 +110,19 @@ namespace NCodeParser.ViewModel
 
 		private void OnSave()
 		{
-			// TODO
+			foreach (var keyValue in ViewModels)
+			{
+				keyValue.Value.SetConfig();
+			}
+
+			Config.Save();
+
+			// TODO Close
 		}
 
 		private void OnCancel()
 		{
-			// TODO
+			// TODO Close
 		}
 	}
 }

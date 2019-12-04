@@ -229,9 +229,9 @@ namespace NCodeParser.IO
 
 			try
 			{
-				if (!loadOnly && !Directory.Exists(novel.Name))
+				if (!loadOnly && !Directory.Exists(Config.NovelPath + novel.Name))
 				{
-					Directory.CreateDirectory(novel.Name);
+					Directory.CreateDirectory(Config.NovelPath + novel.Name);
 				}
 
 				int count = 0;
@@ -314,7 +314,7 @@ namespace NCodeParser.IO
 							}
 							else if (!merging)
 							{
-								File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}.txt", novel.Name, i + 1), result, Encoding.UTF8);
+								File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}.txt", Config.NovelPath + novel.Name, i + 1), result, Encoding.UTF8);
 							}
 
 							if (!loadOnly)
@@ -333,7 +333,7 @@ namespace NCodeParser.IO
 
 								result = builder.ToString();
 
-								File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
+								File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}~{2:D4}.txt", Config.NovelPath + novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
 							}
 						}
 					}
@@ -384,7 +384,7 @@ namespace NCodeParser.IO
 								}
 								else if (!merging)
 								{
-									File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}.txt", novel.Name, i + 1), result, Encoding.UTF8);
+									File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}.txt", Config.NovelPath + novel.Name, i + 1), result, Encoding.UTF8);
 								}
 							}
 
@@ -404,7 +404,7 @@ namespace NCodeParser.IO
 
 								result = builder.ToString();
 
-								File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}~{2:D4}.txt", novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
+								File.WriteAllText(string.Format(CultureInfo.InvariantCulture, "{0}\\{1:D4}~{2:D4}.txt", Config.NovelPath + novel.Name, startIndex + 1, endIndex + 1), result, Encoding.UTF8);
 							}
 						}
 					}

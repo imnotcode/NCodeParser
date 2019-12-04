@@ -311,8 +311,7 @@ namespace NCodeParser.ViewModel
 				return;
 			}
 
-			string filePath = AppDomain.CurrentDomain.BaseDirectory + novel.Name;
-
+			string filePath = Config.NovelPath + novel.Name;
 			if (!Directory.Exists(filePath))
 			{
 				novel.UpdateCount = novel.Episodes.Count;
