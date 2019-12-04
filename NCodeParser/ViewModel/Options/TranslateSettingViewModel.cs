@@ -1,4 +1,6 @@
-﻿namespace NCodeParser.ViewModel.Options
+﻿using System;
+
+namespace NCodeParser.ViewModel.Options
 {
 	public class TranslateSettingViewModel : BaseSettingViewModel
 	{
@@ -9,7 +11,7 @@
 
 		public override void SetConfig()
 		{
-			base.SetConfig();
+			throw new NotImplementedException();
 		}
 	}
 }

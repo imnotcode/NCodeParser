@@ -25,6 +25,14 @@
 		<DataTemplate DataType="{x:Type OptionsViewModel:TranslateSettingViewModel}">
 			<OptionsView:TranslateSettingWindow />
 		</DataTemplate>
+
+		<DataTemplate DataType="{x:Type OptionsViewModel:GSheetsSettingViewModel}">
+			<OptionsView:GSheetsSettingWindow />
+		</DataTemplate>
+
+		<DataTemplate DataType="{x:Type OptionsViewModel:GTransSettingViewModel}">
+			<OptionsView:GTransSettingWindow />
+		</DataTemplate>
 	</Window.Resources>
 
 	<Grid>

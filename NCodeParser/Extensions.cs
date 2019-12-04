@@ -6,27 +6,37 @@ namespace NCodeParser
 {
 	public static class Extensions
 	{
-		public static void AddAll<T>(this IList<T> List, IList<T> Collection)
+		public static void AddAll<T>(this IList<T> list, IList<T> collection)
 		{
-			if (List == null || Collection == null)
+			if (list == null || collection == null)
 			{
 				return;
 			}
 
-			for (int i = 0; i < Collection.Count; i++)
+			for (int i = 0; i < collection.Count; i++)
 			{
-				List.Add(Collection[i]);
+				list.Add(collection[i]);
 			}
 		}
 
-		public static T GetWindow<T>(this Application App)
+		public static T GetWindow<T>(this Application app) where T : Window
 		{
-			return App.Windows.OfType<T>().FirstOrDefault();
+			if (app == null)
+			{
+				return default;
+			}
+
+			return app.Windows.OfType<T>().FirstOrDefault();
 		}
 
-		public static void Close<T>(this Application App)
+		public static void Close<T>(this Application app) where T : Window
 		{
-			foreach (Window Window in App.Windows)
+			if (app == null)
+			{
+				return;
+			}
+
+			foreach (Window Window in app.Windows)
 			{
 				if (Window is T)
 				{
@@ -35,9 +45,9 @@ namespace NCodeParser
 			}
 		}
 
-		public static bool IsWindowOpen<T>(this Application App) where T : Window
+		public static bool IsWindowOpen<T>(this Application app) where T : Window
 		{
-			return App.GetWindow<T>() != null;
+			return app.GetWindow<T>() != null;
 		}
 	}
 }

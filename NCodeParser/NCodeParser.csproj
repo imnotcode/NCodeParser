@@ -165,6 +165,8 @@
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Options\BaseSettingViewModel.cs" />
     <Compile Include="ViewModel\Options\GeneralSettingViewModel.cs" />
+    <Compile Include="ViewModel\Options\GSheetsSettingViewModel.cs" />
+    <Compile Include="ViewModel\Options\GTransSettingViewModel.cs" />
     <Compile Include="ViewModel\Options\TranslateSettingViewModel.cs" />
     <Compile Include="ViewModel\SettingViewModel.cs" />
     <Compile Include="View\AboutWindow.xaml.cs">
@@ -178,6 +180,12 @@
     </Compile>
     <Compile Include="View\Options\GeneralSettingWindow.xaml.cs">
       <DependentUpon>GeneralSettingWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Options\GSheetsSettingWindow.xaml.cs">
+      <DependentUpon>GSheetsSettingWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Options\GTransSettingWindow.xaml.cs">
+      <DependentUpon>GTransSettingWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Options\TranslateSettingWindow.xaml.cs">
       <DependentUpon>TranslateSettingWindow.xaml</DependentUpon>
@@ -210,6 +218,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="View\Options\GeneralSettingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Options\GSheetsSettingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Options\GTransSettingWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

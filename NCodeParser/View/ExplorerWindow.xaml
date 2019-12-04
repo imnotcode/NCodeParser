@@ -4,8 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NCodeParser.View"
+		xmlns:ViewModel="clr-namespace:NCodeParser.ViewModel"
         mc:Ignorable="d"
-        Title="ExplorerWindow" Height="450" Width="800">
+        Title="Explorer" Height="450" Width="800">
+	<Window.DataContext>
+		<ViewModel:ExplorerViewModel />
+	</Window.DataContext>
+	
     <Grid>
         
     </Grid>

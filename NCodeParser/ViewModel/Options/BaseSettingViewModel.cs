@@ -2,11 +2,8 @@
 
 namespace NCodeParser.ViewModel.Options
 {
-	public class BaseSettingViewModel : ViewModelBase
+	public abstract class BaseSettingViewModel : ViewModelBase
 	{
-		public virtual void SetConfig()
-		{
-
-		}
+		public abstract void SetConfig();
 	}
 }

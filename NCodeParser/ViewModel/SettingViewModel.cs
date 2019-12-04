@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
+using NCodeParser.View;
 using NCodeParser.ViewModel.Options;
 
 namespace NCodeParser.ViewModel
@@ -65,7 +66,9 @@ namespace NCodeParser.ViewModel
 			ViewModels = new Dictionary<string, BaseSettingViewModel>
 			{
 				{ "General Setting", new GeneralSettingViewModel() },
-				{ "Translate Setting", new TranslateSettingViewModel() }
+				{ "Translate Setting", new TranslateSettingViewModel() },
+				{ "GSheets Translate", new GSheetsSettingViewModel() },
+				{ "Google Translate", new GTransSettingViewModel() }
 			};
 
 			SetViewModel(ViewModels.First().Key);
@@ -102,7 +105,18 @@ namespace NCodeParser.ViewModel
 					break;
 
 				case "번역":
+				case "일반설정":
 					SetViewModel("Translate Setting");
+
+					break;
+
+				case "Google Sheets":
+					SetViewModel("GSheets Translate");
+
+					break;
+
+				case "Google Translator":
+					SetViewModel("Google Translate");
 
 					break;
 			}
@@ -117,12 +131,12 @@ namespace NCodeParser.ViewModel
 
 			Config.Save();
 
-			// TODO Close
+			App.Current.Close<SettingWindow>();
 		}
 
 		private void OnCancel()
 		{
-			// TODO Close
+			App.Current.Close<SettingWindow>();
 		}
 	}
 }

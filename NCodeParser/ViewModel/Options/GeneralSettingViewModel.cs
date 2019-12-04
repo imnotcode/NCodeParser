@@ -36,8 +36,6 @@ namespace NCodeParser.ViewModel.Options
 
 		public override void SetConfig()
 		{
-			base.SetConfig();
-
 			Config.NovelPath = NovelPath;
 		}
 
