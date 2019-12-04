@@ -144,6 +144,7 @@
     </Compile>
     <Compile Include="IO\INIManager.cs" />
     <Compile Include="IO\NovelDownloader.cs" />
+    <Compile Include="IO\NovelExplorer.cs" />
     <Compile Include="Model\Episode.cs" />
     <Compile Include="Model\Novel.cs" />
     <Compile Include="NativeMethods.cs" />
