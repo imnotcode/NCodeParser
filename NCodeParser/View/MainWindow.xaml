@@ -40,6 +40,10 @@
 	</Window.Resources>
 
 	<i:Interaction.Triggers>
+		<i:EventTrigger EventName="Loaded">
+			<i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+		</i:EventTrigger>
+		
 		<i:EventTrigger EventName="Closing">
 			<i:InvokeCommandAction Command="{Binding ClosingCommand}" />
 		</i:EventTrigger>
@@ -48,6 +52,10 @@
 	<DockPanel>
 		<Menu DockPanel.Dock="Top">
 			<MenuItem Header="File">
+				<MenuItem Header="Explorer" Command="{Binding ExplorerCommand}" />
+
+				<Separator />
+
 				<MenuItem Header="Exit" Command="{Binding ExitCommand}" />
 			</MenuItem>
 

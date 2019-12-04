@@ -17,7 +17,7 @@ namespace NCodeParser.IO
 
 				string URL = "";
 
-				var bytes = client.DownloadData(URL);
+				var bytes = await client.DownloadDataTaskAsync(new Uri(URL)).ConfigureAwait(false);
 				var downloadedString = Encoding.UTF8.GetString(bytes);
 			}
 		}

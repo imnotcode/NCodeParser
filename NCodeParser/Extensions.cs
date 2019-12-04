@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 
 namespace NCodeParser
 {
@@ -19,6 +17,27 @@ namespace NCodeParser
 			{
 				List.Add(Collection[i]);
 			}
+		}
+
+		public static T GetWindow<T>(this Application App)
+		{
+			return App.Windows.OfType<T>().FirstOrDefault();
+		}
+
+		public static void Close<T>(this Application App)
+		{
+			foreach (Window Window in App.Windows)
+			{
+				if (Window is T)
+				{
+					Window.Close();
+				}
+			}
+		}
+
+		public static bool IsWindowOpen<T>(this Application App) where T : Window
+		{
+			return App.GetWindow<T>() != null;
 		}
 	}
 }

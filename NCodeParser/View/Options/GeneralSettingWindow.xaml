@@ -18,6 +18,7 @@
 				<TextBox Grid.Column="0" VerticalContentAlignment="Center" Text="{Binding NovelPath}" />
 				<Button Grid.Column="1" Margin="12,0,12,0" Width="120" Content="..." Command="{Binding SetNovelPathCommand}" />
 			</Grid>
+			<TextBlock Text="* 비워둘 경우 실행 파일 경로에 저장됩니다." />
 		</StackPanel>
 	</Grid>
 </UserControl>

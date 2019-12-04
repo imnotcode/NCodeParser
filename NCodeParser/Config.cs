@@ -13,6 +13,8 @@ namespace NCodeParser
 	{
 		public static readonly string ApplicationName = Assembly.GetEntryAssembly().GetName().Name;
 
+		public static readonly string ApplicationVersion = Assembly.GetEntryAssembly().GetName().Version.ToString();
+
 		public static INIManager INIManager
 		{
 			get;

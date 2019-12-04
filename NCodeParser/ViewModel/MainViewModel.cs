@@ -20,6 +20,12 @@ namespace NCodeParser.ViewModel
 {
 	public class MainViewModel : ViewModelBase
 	{
+		public RelayCommand LoadedCommand
+		{
+			get;
+			private set;
+		}
+
 		public RelayCommand AddCommand1
 		{
 			get;
@@ -51,6 +57,12 @@ namespace NCodeParser.ViewModel
 		}
 
 		public RelayCommand ClosingCommand
+		{
+			get;
+			private set;
+		}
+
+		public RelayCommand ExplorerCommand
 		{
 			get;
 			private set;
@@ -203,12 +215,14 @@ namespace NCodeParser.ViewModel
 
 		private void InitInstance()
 		{
+			LoadedCommand = new RelayCommand(OnLoaded);
 			AddCommand1 = new RelayCommand(OnAdd1, CanAdd1);
 			AddCommand2 = new RelayCommand(OnAdd2, CanAdd2);
 			AddCommand3 = new RelayCommand(OnAdd3, CanAdd3);
 			SelectAllCommand = new RelayCommand(OnSelectAll);
 			DownloadCommand = new RelayCommand(OnDownload);
 			ClosingCommand = new RelayCommand(OnClosing);
+			ExplorerCommand = new RelayCommand(OnExplorer);
 			ExitCommand = new RelayCommand(OnExit);
 			ShowLicenseCommand = new RelayCommand(OnShowLicense);
 			ShowAboutCommand = new RelayCommand(OnShowAbout);
@@ -237,6 +251,15 @@ namespace NCodeParser.ViewModel
 			}
 		}
 
+		private async void OnLoaded()
+		{
+			bool canUpdate = await UpdateHelper.CheckUpdate().ConfigureAwait(false);
+			if (canUpdate)
+			{
+				// TODO
+			}
+		}
+
 		private async Task SelectNovel(Novel novel)
 		{
 			if (novel == null)
@@ -246,10 +269,7 @@ namespace NCodeParser.ViewModel
 
 			if (novel.Episodes.Count == 0)
 			{
-				var Episodes = await Task.Run(() =>
-				{
-					return Downloader.DownloadList(novel);
-				}).ConfigureAwait(false);
+				var Episodes = await Task.Run(() => Downloader.DownloadList(novel)).ConfigureAwait(false);
 
 				if (Episodes != null)
 				{
@@ -422,6 +442,8 @@ namespace NCodeParser.ViewModel
 
 			Code1 = "";
 			UpdateCount++;
+
+			SelectedNovel = novel;
 		}
 
 		private bool CanAdd1()
@@ -456,6 +478,8 @@ namespace NCodeParser.ViewModel
 
 			Code2 = "";
 			UpdateCount++;
+
+			SelectedNovel = novel;
 		}
 
 		private bool CanAdd2()
@@ -490,6 +514,8 @@ namespace NCodeParser.ViewModel
 
 			Code3 = "";
 			UpdateCount++;
+
+			SelectedNovel = novel;
 		}
 
 		private bool CanAdd3()
@@ -542,6 +568,12 @@ namespace NCodeParser.ViewModel
 		{
 			Config.NovelList = NovelList.ToList();
 			Config.Save();
+		}
+
+		private void OnExplorer()
+		{
+			var explorerWindow = new ExplorerWindow();
+			explorerWindow.Show();
 		}
 
 		private void OnExit()
