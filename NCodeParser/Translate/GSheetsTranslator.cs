@@ -19,8 +19,8 @@ namespace NCodeParser.Translate
 		private readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
 		private readonly string SheetID = "1JZwDTknNzCIpFZNoDLqaWEZcm5oJYUiyD5kPH9T7VAI";
 
-		private readonly bool[] RowUsages = new bool[1];
-		private readonly SemaphoreSlim MainSemaphore = new SemaphoreSlim(1, 1);
+		private readonly bool[] RowUsages = new bool[3];
+		private readonly SemaphoreSlim MainSemaphore = new SemaphoreSlim(3, 3);
 		private readonly SemaphoreSlim IDSemaphore = new SemaphoreSlim(1, 1);
 
 		private SheetsService Service;
@@ -86,6 +86,11 @@ namespace NCodeParser.Translate
 
 			var result = await TranslateOneLine(builder.ToString()).ConfigureAwait(false);
 			var splitTexts = result.Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+
+			if (sourceList.Count != splitTexts.Length)
+			{
+
+			}
 
 			builder.Clear();
 			for (int i = 0, j = 0; i < dividedTexts.Length; i++)

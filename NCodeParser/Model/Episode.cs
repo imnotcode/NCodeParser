@@ -39,12 +39,40 @@ namespace NCodeParser.Model
 		{
 			get
 			{
+				if (!string.IsNullOrWhiteSpace(TranslatedText))
+				{
+					return TranslatedText;
+				}
+
+				return SourceText;
+			}
+		}
+
+		public string SourceText
+		{
+			get
+			{
 				return _Text;
 			}
 			set
 			{
 				_Text = value;
 				RaisePropertyChanged();
+				RaisePropertyChanged(nameof(Text));
+			}
+		}
+
+		public string TranslatedText
+		{
+			get
+			{
+				return _TranslatedText;
+			}
+			set
+			{
+				_TranslatedText = value;
+				RaisePropertyChanged();
+				RaisePropertyChanged(nameof(Text));
 			}
 		}
 
@@ -52,6 +80,7 @@ namespace NCodeParser.Model
 		private string _Title;
 		private string _URLNumber;
 		private string _Text;
+		private string _TranslatedText;
 
 		public override string ToString()
 		{

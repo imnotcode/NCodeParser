@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -240,7 +241,7 @@ namespace NCodeParser.ViewModel
 			DeleteNovelCommand = new RelayCommand(OnDeleteNovel, CanDeleteNovel);
 
 			Downloader = new NovelDownloader();
-			Downloader.ProgressChanged += Downloader_ProgressChanged;
+			Downloader.PrologueChanged += Downloader_PrologueChanged;
 
 			Config.Init();
 		}
@@ -319,6 +320,9 @@ namespace NCodeParser.ViewModel
 				return;
 			}
 
+			novel.ShowProgress = true;
+			RaisePropertyChanged(nameof(ShowProgress));
+
 			if (novel.Episodes.Count == 0)
 			{
 				var Episodes = await Task.Run(() => Downloader.DownloadList(novel)).ConfigureAwait(false);
@@ -342,18 +346,13 @@ namespace NCodeParser.ViewModel
 				novel.EpisodeEndIndex = novel.Episodes.Count - 1;
 			}
 
-			if (novel.Episodes.Count > 0 && string.IsNullOrWhiteSpace(novel.Episodes[0].Text))
+			if (novel.Episodes.Count > 0 && string.IsNullOrWhiteSpace(novel.Episodes[0].SourceText))
 			{
-				novel.ShowProgress = true;
-				RaisePropertyChanged(nameof(ShowProgress));
-
 				await Downloader.DownloadNovel(novel, 0, 0, false, true).ConfigureAwait(false);
-
-				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
-
-				novel.ShowProgress = false;
-				RaisePropertyChanged(nameof(ShowProgress));
 			}
+
+			novel.ShowProgress = false;
+			RaisePropertyChanged(nameof(ShowProgress));
 		}
 
 		private void CheckAllUpdate()
@@ -602,10 +601,10 @@ namespace NCodeParser.ViewModel
 			int startIndex = novel.EpisodeStartIndex;
 			int endIndex = novel.EpisodeEndIndex;
 
-			novel.ProgressMax = (endIndex - startIndex) + 1;
+			novel.ProgressMax = ((endIndex - startIndex) + 1) * 2;
+			novel.ProgressValue = 0;
 
-			await Downloader.DownloadNovel(
-				novel, startIndex, endIndex, novel.Merging).ConfigureAwait(false);
+			await Downloader.DownloadNovel(novel, startIndex, endIndex, true).ConfigureAwait(false);
 		}
 
 		private void OnClosing()
@@ -694,10 +693,10 @@ namespace NCodeParser.ViewModel
 			return true;
 		}
 
-		private void Downloader_ProgressChanged(object sender, int Value)
+		private void Downloader_PrologueChanged(object sender, System.EventArgs e)
 		{
 			var novel = sender as Novel;
-			novel.ProgressValue = Value;
+			novel.RaisePropertyChanged(nameof(Novel.DescWithPrologue));
 		}
 	}
 }
