@@ -145,6 +145,7 @@
     <Compile Include="Control\Converter\VisibilityConverter.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Translate\BingTranslator.cs" />
     <Compile Include="Translate\Translator.cs" />
     <Compile Include="IO\CookieAwareWebClient.cs">
       <SubType>Component</SubType>

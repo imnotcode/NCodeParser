@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
@@ -8,6 +9,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Util.Store;
+using NCodeParser.Utility;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource.UpdateRequest;
 
 namespace NCodeParser.Translate
@@ -17,24 +19,27 @@ namespace NCodeParser.Translate
 		private readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
 		private readonly string SheetID = "1JZwDTknNzCIpFZNoDLqaWEZcm5oJYUiyD5kPH9T7VAI";
 
-		private readonly bool[] RowUsages = new bool[10];
-		private readonly SemaphoreSlim MainSemaphore = new SemaphoreSlim(10, 10);
+		private readonly bool[] RowUsages = new bool[1];
+		private readonly SemaphoreSlim MainSemaphore = new SemaphoreSlim(1, 1);
 		private readonly SemaphoreSlim IDSemaphore = new SemaphoreSlim(1, 1);
 
-		protected override async Task<string> TranslateOneLine(string input)
-		{
-			int rowID = -1;
+		private SheetsService Service;
 
+		public GSheetsTranslator()
+		{
+
+		}
+
+		public async Task InitializeService()
+		{
 			try
 			{
-				await MainSemaphore.WaitAsync().ConfigureAwait(false);
-
-				UserCredential credential;
-
 				if (!File.Exists("credentials.json"))
 				{
-					return input;
+					return;
 				}
+
+				UserCredential credential;
 
 				using (var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
 				{
@@ -49,41 +54,109 @@ namespace NCodeParser.Translate
 						new FileDataStore(credPath, true)).ConfigureAwait(false);
 				}
 
-				using (var sheetService = new SheetsService(new BaseClientService.Initializer()
+				Service = new SheetsService(new BaseClientService.Initializer()
 				{
 					HttpClientInitializer = credential,
-					ApplicationName = Config.ApplicationName,
-				}))
+					ApplicationName = Config.ApplicationName
+				});
+			}
+			catch
+			{
+
+			}
+		}
+
+		public override async Task<string> Translate(string input)
+		{
+			var dividedTexts = StringUtil.DivideString(input);
+
+			var sourceList = new List<string>();
+			var builder = new StringBuilder();
+
+			for (int i = 0; i < dividedTexts.Length; i++)
+			{
+				if (!string.IsNullOrWhiteSpace(dividedTexts[i]))
 				{
-					rowID = await GetRowID().ConfigureAwait(false);
-					if (rowID == -1)
+					sourceList.Add(dividedTexts[i]);
+
+					builder.Append(dividedTexts[i]);
+					builder.Append(" | ");
+				}
+			}
+
+			var result = await TranslateOneLine(builder.ToString()).ConfigureAwait(false);
+			var splitTexts = result.Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+
+			builder.Clear();
+			for (int i = 0, j = 0; i < dividedTexts.Length; i++)
+			{
+				if (!string.IsNullOrWhiteSpace(dividedTexts[i]))
+				{
+					var translatedText = splitTexts[j++].Trim();
+
+					if (Config.TranslateWithSource && dividedTexts[i] != translatedText)
 					{
-						return input;
+						builder.Append(dividedTexts[i]);
+						builder.Append(Environment.NewLine);
 					}
 
-					string from = "A" + rowID;
-					string to = "E" + rowID;
+					builder.Append(translatedText);
+				}
 
-					IList<IList<object>> list = new List<IList<object>>();
-					list.Add(new List<object>() { input, "=GOOGLETRANSLATE(" + from + ", \"ja\", \"ko\")" });
+				builder.Append(Environment.NewLine);
+			}
 
-					var range = new ValueRange();
-					range.Values = list;
+			return builder.ToString();
+		}
 
-					var request = sheetService.Spreadsheets.Values.Update(range, SheetID, $"{from}:{to}");
-					request.ValueInputOption = ValueInputOptionEnum.USERENTERED;
+		protected override async Task<string> TranslateOneLine(string input)
+		{
+			int rowID = -1;
 
-					var response = await request.ExecuteAsync().ConfigureAwait(false);
+			try
+			{
+				if (Service == null)
+				{
+					return input;
+				}
 
-					var result = await Load(rowID).ConfigureAwait(false);
-					if (string.IsNullOrWhiteSpace(result))
+				await MainSemaphore.WaitAsync().ConfigureAwait(false);
+
+				rowID = await GetRowID().ConfigureAwait(false);
+				if (rowID == -1)
+				{
+					return input;
+				}
+
+				string from = "A" + rowID;
+				string to = "E" + rowID;
+
+				IList<IList<object>> list = new List<IList<object>>();
+				list.Add(new List<object>() { input, "=GOOGLETRANSLATE(" + from + ", \"ja\", \"ko\")" });
+
+				var range = new ValueRange();
+				range.Values = list;
+
+				var request = Service.Spreadsheets.Values.Update(range, SheetID, $"{from}:{to}");
+				request.ValueInputOption = ValueInputOptionEnum.USERENTERED;
+
+				var response = await request.ExecuteAsync().ConfigureAwait(false);
+
+				var result = await Load(rowID).ConfigureAwait(false);
+				if (string.IsNullOrWhiteSpace(result))
+				{
+					return input;
+				}
+				else
+				{
+					if (result == "로드 중...")
 					{
-						return input;
+						ReleaseRowID(rowID);
+
+						return await TranslateOneLine(input).ConfigureAwait(false);
 					}
-					else
-					{
-						return result;
-					}
+
+					return result;
 				}
 			}
 			catch
@@ -145,37 +218,20 @@ namespace NCodeParser.Translate
 		{
 			try
 			{
-				UserCredential credential;
-
-				using (var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
+				if (Service == null)
 				{
-					// The file token.json stores the user's access and refresh tokens, and is created
-					// automatically when the authorization flow completes for the first time.
-					string credPath = "token.json";
-					credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-						GoogleClientSecrets.Load(stream).Secrets,
-						Scopes,
-						"user",
-						CancellationToken.None,
-						new FileDataStore(credPath, true)).ConfigureAwait(false);
+					return "";
 				}
 
-				using (var sheetService = new SheetsService(new BaseClientService.Initializer()
-				{
-					HttpClientInitializer = credential,
-					ApplicationName = Config.ApplicationName,
-				}))
-				{
-					string from = "A" + rowID;
-					string to = "E" + rowID;
+				string from = "A" + rowID;
+				string to = "E" + rowID;
 
-					var request = sheetService.Spreadsheets.Values.BatchGet(SheetID);
-					request.Ranges = $"{from}:{to}";
+				var request = Service.Spreadsheets.Values.BatchGet(SheetID);
+				request.Ranges = $"{from}:{to}";
 
-					var response = await request.ExecuteAsync().ConfigureAwait(false);
+				var response = await request.ExecuteAsync().ConfigureAwait(false);
 
-					return response.ValueRanges[0].Values[0][1].ToString();
-				}
+				return response.ValueRanges[0].Values[0][1].ToString();
 			}
 			catch
 			{

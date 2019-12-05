@@ -9,7 +9,7 @@ namespace NCodeParser.Translate
 {
 	public abstract class Translator
 	{
-		public async Task<string> Translate(string input)
+		public virtual async Task<string> Translate(string input)
 		{
 			var dividedTexts = StringUtil.DivideString(input);
 			var tasks = new List<Task<string>>();
@@ -31,10 +31,21 @@ namespace NCodeParser.Translate
 				{
 					var translatedText = await tasks[j++].ConfigureAwait(false);
 
+					if (Config.TranslateWithSource && dividedTexts[i] != translatedText)
+					{
+						builder.Append(dividedTexts[i]);
+						builder.Append(Environment.NewLine);
+					}
+
 					builder.Append(translatedText);
 				}
 
 				builder.Append(Environment.NewLine);
+
+				if (Config.TranslateWithSource)
+				{
+					builder.Append(Environment.NewLine);
+				}
 			}
 
 			return builder.ToString();

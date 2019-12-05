@@ -15,6 +15,7 @@ namespace NCodeParser
 
 	public enum TranslatorType
 	{
+		None,
 		GSheet,
 		Google,
 		Papago,

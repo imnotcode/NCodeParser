@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
+
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 
@@ -226,7 +222,7 @@ namespace NCodeParser.ViewModel
 			InitControls();
 		}
 
-		private void InitInstance()
+		private async Task InitInstance()
 		{
 			LoadedCommand = new RelayCommand(OnLoaded);
 			AddCommand1 = new RelayCommand(OnAdd1, CanAdd1);
@@ -243,16 +239,13 @@ namespace NCodeParser.ViewModel
 			OpenFolderCommand = new RelayCommand(OnOpenFolder, CanOpenFolder);
 			DeleteNovelCommand = new RelayCommand(OnDeleteNovel, CanDeleteNovel);
 
-			Translator = new PapagoTranslator();
-
 			Downloader = new NovelDownloader();
-			Downloader.SetTranslator(Translator);
 			Downloader.ProgressChanged += Downloader_ProgressChanged;
 
 			Config.Init();
 		}
 
-		private void InitControls()
+		private async void InitControls()
 		{
 			NovelList = new ObservableCollection<Novel>();
 			NovelList.AddAll(Config.NovelList);
@@ -264,7 +257,8 @@ namespace NCodeParser.ViewModel
 
 			if (!IsInDesignMode)
 			{
-				Task.Run(() => CheckAllUpdate());
+				await SetTranslator().ConfigureAwait(false);
+				await Task.Run(() => CheckAllUpdate()).ConfigureAwait(false);
 			}
 		}
 
@@ -275,6 +269,47 @@ namespace NCodeParser.ViewModel
 			{
 				// TODO
 			}
+		}
+
+		private async Task SetTranslator()
+		{
+			if (Config.TranslatorType == TranslatorType.GSheet)
+			{
+				var translator = new GSheetsTranslator();
+				await translator.InitializeService().ConfigureAwait(false);
+
+				Translator = translator;
+			}
+			else if (Config.TranslatorType == TranslatorType.Google)
+			{
+				var translator = new GoogleTranslator();
+
+				Translator = translator;
+			}
+			else if (Config.TranslatorType == TranslatorType.Papago)
+			{
+				var translator = new PapagoTranslator();
+
+				Translator = translator;
+			}
+			else if (Config.TranslatorType == TranslatorType.EZTrans)
+			{
+				var translator = new EZTranslator();
+
+				Translator = translator;
+			}
+			else if (Config.TranslatorType == TranslatorType.Bing)
+			{
+				var translator = new BingTranslator();
+
+				Translator = translator;
+			}
+			else
+			{
+				Translator = null;
+			}
+
+			Downloader.SetTranslator(Translator);
 		}
 
 		private async Task SelectNovel(Novel novel)
@@ -310,12 +345,14 @@ namespace NCodeParser.ViewModel
 			if (novel.Episodes.Count > 0 && string.IsNullOrWhiteSpace(novel.Episodes[0].Text))
 			{
 				novel.ShowProgress = true;
+				RaisePropertyChanged(nameof(ShowProgress));
 
 				await Downloader.DownloadNovel(novel, 0, 0, false, true).ConfigureAwait(false);
 
 				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
 
 				novel.ShowProgress = false;
+				RaisePropertyChanged(nameof(ShowProgress));
 			}
 		}
 

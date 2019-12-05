@@ -21,7 +21,11 @@ namespace NCodeParser
 			private set;
 		}
 
-		public static List<Novel> NovelList = new List<Novel>();
+		public static List<Novel> NovelList
+		{
+			get;
+			set;
+		}
 
 		public static string NovelPath
 		{
@@ -42,6 +46,18 @@ namespace NCodeParser
 			}
 		}
 
+		public static TranslatorType TranslatorType
+		{
+			get;
+			set;
+		}
+
+		public static bool TranslateWithSource
+		{
+			get;
+			set;
+		}
+
 		private static string _NovelPath = "";
 
 		public static void Init()
@@ -50,6 +66,8 @@ namespace NCodeParser
 
 			NovelPath = INIManager.GetNovelPath();
 			NovelList = INIManager.GetNovels();
+			TranslatorType = TranslatorType.GSheet; // TODO
+			TranslateWithSource = true; // TODO
 		}
 
 		public static void Save()
@@ -57,6 +75,8 @@ namespace NCodeParser
 			INIManager.Clear();
 			INIManager.SetNovelPath(NovelPath);
 			INIManager.SetNovels(NovelList);
+			// TODO SetTranslatorType
+			// TODO
 		}
 	}
 }
