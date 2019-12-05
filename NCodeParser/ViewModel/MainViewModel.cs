@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -87,6 +88,18 @@ namespace NCodeParser.ViewModel
 		}
 
 		public RelayCommand SettingCommand
+		{
+			get;
+			private set;
+		}
+
+		public RelayCommand OpenFolderCommand
+		{
+			get;
+			private set;
+		}
+
+		public RelayCommand DeleteNovelCommand
 		{
 			get;
 			private set;
@@ -227,6 +240,8 @@ namespace NCodeParser.ViewModel
 			ShowLicenseCommand = new RelayCommand(OnShowLicense);
 			ShowAboutCommand = new RelayCommand(OnShowAbout);
 			SettingCommand = new RelayCommand(OnSetting);
+			OpenFolderCommand = new RelayCommand(OnOpenFolder, CanOpenFolder);
+			DeleteNovelCommand = new RelayCommand(OnDeleteNovel, CanDeleteNovel);
 
 			Downloader = new NovelDownloader();
 			Downloader.ProgressChanged += Downloader_ProgressChanged;
@@ -597,6 +612,57 @@ namespace NCodeParser.ViewModel
 		{
 			var window = new SettingWindow();
 			window.ShowDialog();
+		}
+
+		private void OnOpenFolder()
+		{
+			if (SelectedNovel == null)
+			{
+				return;
+			}
+
+			var path = Config.NovelPath + SelectedNovel.Name;
+			if (!Directory.Exists(path))
+			{
+				Directory.CreateDirectory(path);
+			}
+
+			Process.Start(path);
+		}
+
+		private bool CanOpenFolder()
+		{
+			if (SelectedNovel == null)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		private void OnDeleteNovel()
+		{
+			if (SelectedNovel == null)
+			{
+				return;
+			}
+
+			NovelList.Remove(SelectedNovel);
+
+			if (NovelList.Count > 0)
+			{
+				SelectedNovel = NovelList[0];
+			}
+		}
+
+		private bool CanDeleteNovel()
+		{
+			if (SelectedNovel == null)
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 		private void Downloader_ProgressChanged(object sender, int Value)

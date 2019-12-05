@@ -108,11 +108,11 @@
 
 				<DataGrid.ContextMenu>
 					<ContextMenu>
-						<MenuItem Header="Open Folder" />
+						<MenuItem Header="Open Folder" Command="{Binding OpenFolderCommand}" />
 
 						<Separator />
 
-						<MenuItem Header="Delete" />
+						<MenuItem Header="Delete" Command="{Binding DeleteNovelCommand}" />
 					</ContextMenu>
 				</DataGrid.ContextMenu>
 			</DataGrid>
