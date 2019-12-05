@@ -12,4 +12,13 @@ namespace NCodeParser
         R18,
 		Kakuyomu
     };
+
+	public enum TranslatorType
+	{
+		GSheet,
+		Google,
+		Papago,
+		EZTrans,
+		Bing
+	};
 }

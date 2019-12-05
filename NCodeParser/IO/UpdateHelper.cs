@@ -20,9 +20,9 @@ namespace NCodeParser.IO
 				string URL = LatestReleaseURL;
 
 				var bytes = await client.DownloadDataTaskAsync(new Uri(URL)).ConfigureAwait(false);
-				var downloadedString = Encoding.UTF8.GetString(bytes);
+				var downloadedText = Encoding.UTF8.GetString(bytes);
 
-				var jObject = JObject.Parse(downloadedString);
+				var jObject = JObject.Parse(downloadedText);
 
 				string tagVersion = jObject["tag_name"].ToString();
 				tagVersion = tagVersion.Replace("v", "");

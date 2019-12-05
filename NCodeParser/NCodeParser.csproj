@@ -145,7 +145,7 @@
     <Compile Include="Control\Converter\VisibilityConverter.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Interfaces\ITranslator.cs" />
+    <Compile Include="Translate\Translator.cs" />
     <Compile Include="IO\CookieAwareWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -159,6 +159,8 @@
     <Compile Include="Translate\EZTranslator.cs" />
     <Compile Include="Translate\GoogleTranslator.cs" />
     <Compile Include="Translate\GSheetsTranslator.cs" />
+    <Compile Include="Translate\PapagoTranslator.cs" />
+    <Compile Include="Utility\StringUtil.cs" />
     <Compile Include="ViewModel\AboutViewModel.cs" />
     <Compile Include="ViewModel\ExplorerViewModel.cs" />
     <Compile Include="ViewModel\LicenseViewModel.cs" />

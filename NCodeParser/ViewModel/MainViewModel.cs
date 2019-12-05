@@ -11,7 +11,7 @@ using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
-using NCodeParser.Interfaces;
+
 using NCodeParser.IO;
 using NCodeParser.Model;
 using NCodeParser.Translate;
@@ -218,7 +218,7 @@ namespace NCodeParser.ViewModel
 		private int _UpdateCount;
 
 		private NovelDownloader Downloader;
-		private ITranslator Translator;
+		private Translator Translator;
 
 		public MainViewModel()
 		{
@@ -243,10 +243,12 @@ namespace NCodeParser.ViewModel
 			OpenFolderCommand = new RelayCommand(OnOpenFolder, CanOpenFolder);
 			DeleteNovelCommand = new RelayCommand(OnDeleteNovel, CanDeleteNovel);
 
+			Translator = new PapagoTranslator();
+
 			Downloader = new NovelDownloader();
+			Downloader.SetTranslator(Translator);
 			Downloader.ProgressChanged += Downloader_ProgressChanged;
 
-			Translator = new GSheetsTranslator();
 			Config.Init();
 		}
 
@@ -308,22 +310,12 @@ namespace NCodeParser.ViewModel
 			if (novel.Episodes.Count > 0 && string.IsNullOrWhiteSpace(novel.Episodes[0].Text))
 			{
 				novel.ShowProgress = true;
-				RaisePropertyChanged(nameof(ShowProgress));
 
 				await Downloader.DownloadNovel(novel, 0, 0, false, true).ConfigureAwait(false);
 
 				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
 
 				novel.ShowProgress = false;
-				RaisePropertyChanged(nameof(ShowProgress));
-
-				var task1 = Translator.Translate(novel.Desc);
-				var task2 = Translator.Translate(novel.Episodes[0].Text);
-
-				novel.Desc = await task1.ConfigureAwait(false);
-				novel.Episodes[0].Text = await task2.ConfigureAwait(false);
-
-				novel.RaisePropertyChanged(nameof(novel.DescWithPrologue));
 			}
 		}
 

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using HtmlAgilityPack;
 using NCodeParser.Model;
+using NCodeParser.Translate;
 
 namespace NCodeParser.IO
 {
@@ -21,6 +22,13 @@ namespace NCodeParser.IO
 		private readonly string KakuyomuURL = "https://kakuyomu.jp/works/";
 
 		public event EventHandler<int> ProgressChanged;
+
+		private Translator Translator;
+
+		public void SetTranslator(Translator translator)
+		{
+			Translator = translator;
+		}
 
 		public List<Episode> DownloadList(Novel novel)
 		{
@@ -70,7 +78,7 @@ namespace NCodeParser.IO
 
 						var bytes = client.DownloadData(URL);
 						var downloadedString = Encoding.UTF8.GetString(bytes);
-						var MatchCollection = new Regex("<a href=\"/" + novel.Code + "/([0-9]*)/\">(.*)</a>", RegexOptions.IgnoreCase).Matches(downloadedString);
+						var collection = new Regex("<a href=\"/" + novel.Code + "/([0-9]*)/\">(.*)</a>", RegexOptions.IgnoreCase).Matches(downloadedString);
 
 						var document = new HtmlDocument();
 						document.LoadHtml(downloadedString);
@@ -82,7 +90,13 @@ namespace NCodeParser.IO
 
 						if (string.IsNullOrWhiteSpace(novel.Desc))
 						{
-							novel.Desc = document.GetElementbyId("novel_ex").InnerText;
+							var desc = document.GetElementbyId("novel_ex").InnerText;
+							if (Translator != null)
+							{
+								desc = Translator.Translate(desc).Result;
+							}
+							
+							novel.Desc = desc;
 						}
 
 						if (novel.LastUpdateTime == default)
@@ -101,13 +115,13 @@ namespace NCodeParser.IO
 						}
 
 						var episodes = new List<Episode>();
-						for (int i = 0; i < MatchCollection.Count; i++)
+						for (int i = 0; i < collection.Count; i++)
 						{
 							var episode = new Episode
 							{
 								Number = i + 1,
 								URLNumber = (i + 1).ToString(),
-								Title = MatchCollection[i].Value.Split('>')[1].Split('<')[0]
+								Title = collection[i].Value.Split('>')[1].Split('<')[0]
 							};
 
 							episodes.Add(episode);
@@ -127,8 +141,8 @@ namespace NCodeParser.IO
 
 						var bytes = client.DownloadData(URL);
 						var downloadedString = Encoding.UTF8.GetString(bytes);
-						var Regex1 = new Regex("\"widget-toc-episode-titleLabel js-vertical-composition-item\">");
-						var Regex2 = new Regex("/episodes/");
+						var regex1 = new Regex("\"widget-toc-episode-titleLabel js-vertical-composition-item\">");
+						var regex2 = new Regex("/episodes/");
 
 						var document = new HtmlDocument();
 						document.LoadHtml(downloadedString);
@@ -140,69 +154,75 @@ namespace NCodeParser.IO
 
 						if (string.IsNullOrWhiteSpace(novel.Desc))
 						{
-							novel.Desc = document.GetElementbyId("introduction").InnerText;
+							var desc = document.GetElementbyId("introduction").InnerText;
+							if (Translator != null)
+							{
+								desc = Translator.Translate(desc).Result;
+							}
+
+							novel.Desc = desc;
 						}
 
-						var Matches1 = Regex1.Matches(downloadedString);
-						var Matches2 = Regex2.Matches(downloadedString);
+						var matches1 = regex1.Matches(downloadedString);
+						var matches2 = regex2.Matches(downloadedString);
 
-						var Episodes = new List<Episode>();
-						var Dict = new Dictionary<string, Episode>();
+						var episodes = new List<Episode>();
+						var dict = new Dictionary<string, Episode>();
 
 						int Count = 0;
-						for (int i = 0, j = 0; i < Matches1.Count && j < Matches2.Count; i++, j++)
+						for (int i = 0, j = 0; i < matches1.Count && j < matches2.Count; i++, j++)
 						{
-							int StartIndex1 = Matches1[i].Index + Matches1[i].Length;
-							int EndIndex1 = downloadedString.IndexOf("</span>", StartIndex1) - 1;
+							int startIndex1 = matches1[i].Index + matches1[i].Length;
+							int endIndex1 = downloadedString.IndexOf("</span>", startIndex1, StringComparison.InvariantCulture) - 1;
 
-							if (StartIndex1 < 0 || EndIndex1 < 0)
+							if (startIndex1 < 0 || endIndex1 < 0)
 							{
 								continue;
 							}
 
-							int StartIndex2 = Matches2[j].Index + Matches2[j].Length;
-							int EndIndex2 = downloadedString.IndexOf("\"", StartIndex2) - 1;
+							int startIndex2 = matches2[j].Index + matches2[j].Length;
+							int endIndex2 = downloadedString.IndexOf("\"", startIndex2, StringComparison.InvariantCulture) - 1;
 
-							if (StartIndex2 < 0 || EndIndex2 < 0)
-							{
-								i--;
-								continue;
-							}
-
-							string Title = downloadedString.Substring(StartIndex1, EndIndex1 - StartIndex1 + 1);
-							string StringNumber = downloadedString.Substring(StartIndex2, EndIndex2 - StartIndex2 + 1);
-
-							if (StringNumber == novel.Code)
+							if (startIndex2 < 0 || endIndex2 < 0)
 							{
 								i--;
 								continue;
 							}
 
-							bool IsSuccess = long.TryParse(StringNumber, out long Number);
-							if (!IsSuccess)
+							string title = downloadedString.Substring(startIndex1, endIndex1 - startIndex1 + 1);
+							string stringNumber = downloadedString.Substring(startIndex2, endIndex2 - startIndex2 + 1);
+
+							if (stringNumber == novel.Code)
 							{
 								i--;
 								continue;
 							}
 
-							if (Dict.ContainsKey(StringNumber))
+							bool isSuccess = long.TryParse(stringNumber, out long Number);
+							if (!isSuccess)
 							{
 								i--;
 								continue;
 							}
 
-							var Episode = new Episode
+							if (dict.ContainsKey(stringNumber))
+							{
+								i--;
+								continue;
+							}
+
+							var episode = new Episode
 							{
 								Number = ++Count,
-								URLNumber = StringNumber,
-								Title = Title
+								URLNumber = stringNumber,
+								Title = title
 							};
 
-							Episodes.Add(Episode);
-							Dict.Add(Episode.URLNumber, Episode);
+							episodes.Add(episode);
+							dict.Add(episode.URLNumber, episode);
 						}
 
-						return Episodes;
+						return episodes;
 					}
 				}
 			}
@@ -306,6 +326,11 @@ namespace NCodeParser.IO
 							result = result.Replace("&lt", "<");
 							result = result.Replace("&gt", ">");
 
+							if (Translator != null)
+							{
+								result = await Translator.Translate(result).ConfigureAwait(false);
+							}
+
 							dict.Add(i, result);
 
 							if (loadOnly)
@@ -376,6 +401,11 @@ namespace NCodeParser.IO
 
 							if (!dict.ContainsKey(novel.Episodes[i].URLNumber))
 							{
+								if (Translator != null)
+								{
+									result = await Translator.Translate(result).ConfigureAwait(false);
+								}
+
 								dict.Add(novel.Episodes[i].URLNumber, result);
 
 								if (loadOnly)

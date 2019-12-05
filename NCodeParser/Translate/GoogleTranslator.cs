@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
-using NCodeParser.Interfaces;
 
 namespace NCodeParser.Translate
 {
-	public class GoogleTranslator : ITranslator
+	public class GoogleTranslator : Translator
 	{
 		public GoogleTranslator()
 		{
 
 		}
 
-		public async Task<string> Translate(string input)
+		protected override async Task<string> TranslateOneLine(string input)
 		{
 			throw new NotImplementedException();
 		}

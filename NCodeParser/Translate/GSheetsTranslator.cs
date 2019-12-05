@@ -8,12 +8,11 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Util.Store;
-using NCodeParser.Interfaces;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource.UpdateRequest;
 
 namespace NCodeParser.Translate
 {
-	public class GSheetsTranslator : ITranslator, IDisposable
+	public class GSheetsTranslator : Translator, IDisposable
 	{
 		private readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
 		private readonly string SheetID = "1JZwDTknNzCIpFZNoDLqaWEZcm5oJYUiyD5kPH9T7VAI";
@@ -22,7 +21,7 @@ namespace NCodeParser.Translate
 		private readonly SemaphoreSlim MainSemaphore = new SemaphoreSlim(10, 10);
 		private readonly SemaphoreSlim IDSemaphore = new SemaphoreSlim(1, 1);
 
-		public async Task<string> Translate(string input)
+		protected override async Task<string> TranslateOneLine(string input)
 		{
 			int rowID = -1;
 
