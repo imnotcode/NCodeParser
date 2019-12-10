@@ -4,7 +4,9 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Google;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Requests;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
@@ -89,7 +91,10 @@ namespace NCodeParser.Translate
 
 			if (sourceList.Count != splitTexts.Length)
 			{
-
+				for (int i = 0; i < sourceList.Count; i++)
+				{
+					
+				}
 			}
 
 			builder.Clear();
@@ -97,6 +102,11 @@ namespace NCodeParser.Translate
 			{
 				if (!string.IsNullOrWhiteSpace(dividedTexts[i]))
 				{
+					if (splitTexts.Length <= j)
+					{
+
+					}
+
 					var translatedText = splitTexts[j++].Trim();
 
 					if (Config.TranslateWithSource && dividedTexts[i] != translatedText)
@@ -136,11 +146,15 @@ namespace NCodeParser.Translate
 				string from = "A" + rowID;
 				string to = "E" + rowID;
 
-				IList<IList<object>> list = new List<IList<object>>();
-				list.Add(new List<object>() { input, "=GOOGLETRANSLATE(" + from + ", \"ja\", \"ko\")" });
+				IList<IList<object>> list = new List<IList<object>>
+				{
+					new List<object>() { input, "=GOOGLETRANSLATE(" + from + ", \"ja\", \"ko\")" }
+				};
 
-				var range = new ValueRange();
-				range.Values = list;
+				var range = new ValueRange
+				{
+					Values = list
+				};
 
 				var request = Service.Spreadsheets.Values.Update(range, SheetID, $"{from}:{to}");
 				request.ValueInputOption = ValueInputOptionEnum.USERENTERED;
@@ -164,9 +178,16 @@ namespace NCodeParser.Translate
 					return result;
 				}
 			}
+			catch (GoogleApiException e)
+			{
+				if (e.ToString().Contains("user per 100 seconds"))
+				{
+					// TODO 100초당 500번
+				}
+			}
 			catch
 			{
-
+				
 			}
 			finally
 			{

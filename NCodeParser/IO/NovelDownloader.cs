@@ -346,6 +346,11 @@ namespace NCodeParser.IO
 					document.LoadHtml(input);
 
 					var result = document.GetElementbyId("novel_color").InnerText;
+					if (!result.Contains(Environment.NewLine))
+					{
+						result = result.Replace("\n", Environment.NewLine);
+					}
+
 					result = result.Replace("&nbsp;", "");
 					result = result.Replace("<ruby>", "");
 					result = result.Replace("</ruby>", "");
@@ -379,6 +384,11 @@ namespace NCodeParser.IO
 					document.LoadHtml(input);
 
 					var result = document.GetElementbyId("contentMain-inner").InnerText;
+					if (!result.Contains(Environment.NewLine))
+					{
+						result = result.Replace("\n", Environment.NewLine);
+					}
+
 					result = result.Replace("&nbsp;", "");
 					result = result.Replace("<em class=\"emphasisDots\">", "");
 					result = result.Replace("</em>", "");
@@ -392,7 +402,7 @@ namespace NCodeParser.IO
 					result = result.Replace("</rb>", "");
 					result = result.Replace("<rt>", "");
 					result = result.Replace("</rt>", "");
-					result = result.Replace("<br />", "\r\n");
+					result = result.Replace("<br />", Environment.NewLine);
 
 					episode.SourceText = result;
 				}

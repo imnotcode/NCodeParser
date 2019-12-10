@@ -204,6 +204,11 @@ namespace NCodeParser.ViewModel
 		{
 			get
 			{
+				if (NovelList == null)
+				{
+					return "NCodeParser";
+				}
+
 				return $"NCodeParser ({UpdateCount}/{NovelList.Count})";
 			}
 		}
@@ -223,7 +228,7 @@ namespace NCodeParser.ViewModel
 			InitControls();
 		}
 
-		private async Task InitInstance()
+		private void InitInstance()
 		{
 			LoadedCommand = new RelayCommand(OnLoaded);
 			AddCommand1 = new RelayCommand(OnAdd1, CanAdd1);
@@ -265,15 +270,27 @@ namespace NCodeParser.ViewModel
 
 		private async void OnLoaded()
 		{
-			bool canUpdate = await UpdateHelper.CheckUpdate().ConfigureAwait(false);
-			if (canUpdate)
+			string version = await UpdateHelper.GetLatestVersion().ConfigureAwait(false);
+			if (string.IsNullOrWhiteSpace(version))
 			{
-				// TODO
+				return;
+			}
+
+			string currentVersion = Config.ApplicationVersion;
+			if (false) // TODO Compare Version
+			{
+				var result = MessageBox.Show("TODO");
 			}
 		}
 
 		private async Task SetTranslator()
 		{
+			if (Downloader == null)
+			{
+				Debug.Assert(false);
+				return;
+			}
+
 			if (Config.TranslatorType == TranslatorType.GSheet)
 			{
 				var translator = new GSheetsTranslator();
@@ -315,6 +332,12 @@ namespace NCodeParser.ViewModel
 
 		private async Task SelectNovel(Novel novel)
 		{
+			if (Downloader == null)
+			{
+				Debug.Assert(false);
+				return;
+			}
+
 			if (novel == null)
 			{
 				return;
@@ -332,7 +355,7 @@ namespace NCodeParser.ViewModel
 					novel.Episodes.Clear();
 					novel.Episodes.AddAll(Episodes);
 
-					await App.Current?.Dispatcher.InvokeAsync(() =>
+					await App.Current?.Dispatcher?.InvokeAsync(() =>
 					{
 						novel.UIEpisodes.Clear();
 						novel.UIEpisodes.AddAll(novel.Episodes);
@@ -369,6 +392,12 @@ namespace NCodeParser.ViewModel
 
 		private void CheckUpdate(Novel novel)
 		{
+			if (Downloader == null)
+			{
+				Debug.Assert(false);
+				return;
+			}
+
 			if (novel == null)
 			{
 				return;
@@ -393,7 +422,7 @@ namespace NCodeParser.ViewModel
 					novel.Episodes.Clear();
 					novel.Episodes.AddAll(Episodes);
 
-					App.Current?.Dispatcher.InvokeAsync(() =>
+					App.Current?.Dispatcher?.InvokeAsync(() =>
 					{
 						novel.UIEpisodes.Clear();
 						novel.UIEpisodes.AddAll(novel.Episodes);
@@ -573,31 +602,37 @@ namespace NCodeParser.ViewModel
 
 		private void OnSelectAll()
 		{
-			if (SelectedNovel == null)
+			var novel = SelectedNovel;
+			if (novel == null)
 			{
 				MessageBox.Show("선택된 소설이 없습니다.");
 				return;
 			}
 
-			SelectedNovel.EpisodeStartIndex = 0;
-			SelectedNovel.EpisodeEndIndex = SelectedNovel.Episodes.Count - 1;
+			if (novel.Episodes.Count == 0)
+			{
+				return;
+			}
+
+			novel.EpisodeStartIndex = 0;
+			novel.EpisodeEndIndex = novel.Episodes.Count - 1;
 		}
 
 		private async void OnDownload()
 		{
-			if (SelectedNovel == null)
+			var novel = SelectedNovel;
+			if (novel == null)
 			{
 				MessageBox.Show("선택된 소설이 없습니다.");
 				return;
 			}
 
-			if (SelectedNovel.Episodes.Count == 0)
+			if (novel.Episodes.Count == 0)
 			{
 				MessageBox.Show("다운로드할 수 없습니다.");
 				return;
 			}
 
-			var novel = SelectedNovel;
 			int startIndex = novel.EpisodeStartIndex;
 			int endIndex = novel.EpisodeEndIndex;
 
@@ -621,7 +656,7 @@ namespace NCodeParser.ViewModel
 
 		private void OnExit()
 		{
-			App.Current.MainWindow.Close();
+			App.Current?.MainWindow?.Close();
 		}
 
 		private void OnShowLicense()

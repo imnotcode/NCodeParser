@@ -66,7 +66,7 @@ namespace NCodeParser
 
 			NovelPath = INIManager.GetNovelPath();
 			NovelList = INIManager.GetNovels();
-			TranslatorType = TranslatorType.GSheet; // TODO
+			TranslatorType = TranslatorType.None; // TODO
 			TranslateWithSource = true; // TODO
 		}
 

@@ -4,5 +4,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:d1p1="http://schemas.openxmlformats.org/markup-compatibility/2006"
              StartupUri="View/MainWindow.xaml"
-             d1p1:Ignorable="d" >
+             d1p1:Ignorable="d"
+			 Startup="Application_Startup">
 </Application>
