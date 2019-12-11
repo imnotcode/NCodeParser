@@ -1,6 +1,6 @@
 # NCodeParser
 
-
+[![Build Status](https://dev.azure.com/ansh7938/NCodeParser/_apis/build/status/imnotcode.NCodeParser?branchName=master)](https://dev.azure.com/ansh7938/NCodeParser/_build/latest?definitionId=2&branchName=master)
 
 ## Prerequisites
 
